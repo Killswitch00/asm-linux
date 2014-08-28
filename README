@@ -59,6 +59,33 @@ except the network and disk performance values (NTI, NTO and DIR).
 (The setting "enableAPImonitoring" in asm.ini is not implemented in Linux.)
 
 
+Runtime requirements
+====================
+ASM for Linux needs 32-bit C runtime libraries and the Gnome GLib 2 library.
+The former are probably already installed since you should have a working
+Arma 3 dedicated server up and running already. The 32-bit Gnome GLib library
+can be installed with yum (RHEL/CentOS/Fedora) or apt-get (Debian/Ubuntu):
+
+  sudo yum install glib2
+
+or
+
+  sudo apt-get install libglib2.0-0
+
+On 64-bit operating systems you have to specify the 32-bit variant of the
+package:
+
+  sudo yum install glib2.i686
+
+In 64-bit Debian and Ubuntu, you'll have to enable multiarch support first:
+
+  sudo dpkg --add-architecture i386
+  sudo apt-get update
+
+Then, install the 32-bit GLib 2.0 package:
+
+  sudo apt-get install libglib2.0-0:i386
+
 
 Build requirements
 ==================
@@ -68,28 +95,38 @@ server is a legacy 32-bit application.
 In order to build ASM, you will need:
 
  * GNU make
- * a C compiler (for example GNU gcc)
+ * a C compiler (eg gcc)
  * the pkg-config tool
  * 32-bit GNU libc and Gnome GLib 2 development packages.
+ * In 64-bit Debian/Ubuntu, the multilib gcc compiler package.
 
-For Red Hat/CentOS, these "-devel" packages are:
+For Red Hat/CentOS/Fedora, these "-devel" packages are:
 
-    * glib2-devel
     * glibc-devel
+    * glib2-devel
 
-(On 64-bit variants of RHEL/CentOS, you would install glibc2-devel.i686 and
-glibc-devel.i686 in order to be able to build a 32-bit ASM)
+On 64-bit variants of RHEL/CentOS/Fedora, you would install
+
+    * glibc-devel.i686
+    * glibc2-devel.i686
 
 In Debian and Ubuntu, the packages are called
 
     * libc6-dev
     * libglib2.0-dev
 
+On 64-bit Debian and Ubuntu, the 32-bit devel packages are
+
+    * libc6-dev:i386
+    * libglib2.0-dev:i386
+
+See above under "Runtime requirements" for how to enable multiarch support
+in Debian/Ubuntu
 
 
 Building
 ========
-1) On a 32-bit Linux machine, do
+1) On a 32-bit Linux machine, just run
 
         ./configure --prefix=$HOME
 
