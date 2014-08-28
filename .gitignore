@@ -4,5 +4,7 @@
 .cproject
 
 # Autotools output
+config.log
+config.status
 Makefile
 autom4te.cache/
