@@ -1,0 +1,175 @@
+Arma Server Monitor for Linux
+=============================
+
+ArmA Server Monitor (ASM) was created by Fred41 to monitor Windows servers
+running servers for the games ArmA 2 or ArmA 3 made by Bohemia Interactive.
+
+Fred41's ASM can be found on GitHub:
+
+    https://github.com/fred41/ASM/
+
+and there's a discussion thread for ASM in the BI forums at
+
+    http://forums.bistudio.com/showthread.php?155881-Arma-Server-Monitor-%28very-small-but-useful%29
+
+Fred41 describes ASM as
+
+"ASM is a little program, for monitoring some interesting values from multiple
+server (or HC) instances.
+
+Performance related values like:
+
+ * simulation cycles per second average (FPS)
+ * simulation cycles per second minimal (FPSmin)
+ * condition evaluations per second (CPS)
+ * number of alive players (PL#)
+ * number of alive server local AI units (AIL)
+ * number of alive server remote AI units (AIR)
+ * number of mission objects (OC[0..2], free configurable)
+ * amount of allocated physical memory (MEM)
+ * network traffic incoming in kbytes/s (NTI)
+ * network traffic outgoing in kbytes/s (NTO)
+ * disk reading in kbytes/s (DIR)
+ * name of running instance
+ * name of running mission
+
+are displayed, simultaneously for multiple (up to 4) server instances, in a
+window.
+
+The idea behind it, is to provide a fast and easy "state of health" overview
+at one go."
+
+ASM for Linux
+=============
+ASM for Linux consists of
+
+* A shared library, "asmdll.so", for the ArmA 3 server.
+* An application, "asm" that can either be run as a service or a query client.
+
+The ASM service will monitor up to 16 Arma servers and let clients query
+the server to get the performance values. Note that there is no GUI
+client available for Linux. Instead, one can use the Windows GUI that
+Fred41 has made (ArmaServerMonitor.exe)
+
+Features/limitations
+--------------------
+ASM for Linux will report the same values that the Windows variant does,
+except the network and disk performance values (NTI, NTO and DIR).
+
+(The setting "enableAPImonitoring" in asm.ini is not implemented in Linux.)
+
+
+
+Build requirements
+==================
+The shared library must be compiled in 32-bit mode since the ArmA 3 dedicated
+server is a legacy 32-bit application.
+
+In order to build ASM, you will need:
+
+ * GNU make
+ * a C compiler (for example GNU gcc)
+ * the pkg-config tool
+ * 32-bit GNU libc and Gnome GLib 2 development packages.
+
+For Red Hat/CentOS, these "-devel" packages are:
+
+    * glib2-devel
+    * glibc-devel
+
+(On 64-bit variants of RHEL/CentOS, you would install glibc2-devel.i686 and
+glibc-devel.i686 in order to be able to build a 32-bit ASM)
+
+In Debian and Ubuntu, the packages are called
+
+    * libc6-dev
+    * libglib2.0-dev
+
+
+
+Building
+========
+1) On a 32-bit Linux machine, do
+
+        ./configure --prefix=$HOME
+
+   On 64-bit operating systems, you need to tell the configure script to set
+   up the build system to generate 32-bit code:
+
+        ./configure --prefix=$HOME --host=i686-linux-gnu "CFLAGS=-m32" "LDFLAGS=-m32"
+
+2) Build the software:
+
+        make
+
+3) Install ASM
+
+        make install
+
+   Now, the files that have been built will be installed here:
+
+        /home/username/bin/asm
+        /home/username/etc/asm.ini
+        /home/username/lib/armaservermonitor/asmdll.so
+
+  ("username" is the name of the user you are logged in as)
+
+
+Setting up ASM with the Arma 3 dedicated server
+===============================================
+Before you install ASM for Linux, you need to have a working Linux ArmA 3
+dedicated server up and running. This documentation will not describe
+how do set that up. Once you have A3 up and running, proceed with installing
+ASM like this:
+
+1) Get the ASM.zip release archive from Fred41's github page:
+
+	https://github.com/fred41/ASM/
+
+   and unpack that into your Linux Arma 3 server directory. You can then remove
+   the Windows shared library, "ASMdll.dll", since it will not be used by a Linux
+   server.
+
+2) Change the name of the mod folder "@ASM" to lowercase letters:
+
+	mv \@ASM \@asm
+
+3) Change the name of the ASM.pbo addon to all-lowercase:
+
+   mv \@asm/addons/ASM.pbo \@asm/addons/asm.pbo
+
+4) Build ASM for Linux (see above) and then copy asmdll.so and asm to
+   the ArmA 3 server directory. For example, if your ArmA 3 server is
+   installed into /srv/arma3, you would run
+
+	cp $HOME/bin/asm /srv/arma3
+	cp $HOME/lib/armaservermonitor/asmdll.so /srv/arma3
+
+Usage
+=====
+
+1) Change into the Arma 3 server directory and start the ASM service:
+
+        ./asm -s &>asm.txt &
+
+   The asm service will listen for TCP connections on port 24000 by default,
+   so make sure to allow that in your firewall.
+
+2) Launch the Arma 3 server with @asm as a mod. For example:
+
+        ./arma3server <your preferred launch parameters here> -mod=@asm
+
+   Alternatively, you can put the asm.pbo addon into the Arma 3 addons folder,
+   in which case you can start the Arma 3 server without -mod=@asm.
+
+3) In Windows, run the ArmaServerMonitor.exe client applicaiton and connect to
+   the Linux dedi server just like you would connect to a Windows server:
+
+	X:\Path\To\ArmaServerMonitor.exe -c -h<IP address of Arma server>
+
+4) In Windows, run the ArmA 3 game and join the Linux dedicated server. Start a mission.
+
+5) Statistics for the server can now be monitored with the Windows GUI client.
+
+6) $profit?
+

@@ -1,0 +1,71 @@
+#
+# Simple make file that doesn't use the GNU Autotools
+#
+# To compile ASM with this, run
+#
+#   make -f Makefile.old
+#
+ifeq ($(DESTDIR),)
+	PREFIX?=$(HOME)
+else
+	PREFIX?=/usr
+endif
+BINDIR=$(PREFIX)/bin
+LIBDIR?=$(PREFIX)/lib
+
+G2FLAGS:=$(shell PKG_CONFIG_PATH=/usr/lib/pkgconfig pkg-config --cflags glib-2.0)
+G2LIBS:=$(shell PKG_CONFIG_PATH=/usr/lib/pkgconfig pkg-config --libs glib-2.0)
+CFLAGS+=-m32 -I../include $(G2FLAGS)
+LIBS+=-lrt -lm $(G2LIBS)
+
+
+ifeq ($(DEBUG),1)
+	CFLAGS+=-ggdb
+endif
+ifeq ($(CC),lsbcc)
+	CFLAGS+=--lsb-shared-libs=glib-2.0
+endif
+
+.PHONY: all lib clean info
+
+all: asm lib test
+
+asm: asm.c client.c server.c gettickcount.o settings.o util.o
+	$(CC) $(CFLAGS) -o asm asm.c client.c server.c gettickcount.o settings.o util.o $(LIBS)
+
+lib: asmdll.c gettickcount.o settings.o
+	$(CC) $(CFLAGS) -shared -fpic -o asmdll.so asmdll.c gettickcount.o settings.o $(LIBS)
+
+gettickcount.o: gettickcount.c
+	$(CC) $(CFLAGS) -fpic -c gettickcount.c
+
+settings.o: settings.c
+	$(CC) $(CFLAGS) -fpic -c settings.c
+
+util.o: util.c
+	$(CC) $(CFLAGS) -fpic -c util.c
+
+test: test.c
+	$(CC) $(CFLAGS) -g -o test test.c -ldl
+
+
+clean:
+	rm -f asm test *.o *.so*
+
+install:
+	mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(LIBDIR)
+	install -m 755 asm $(DESTDIR)$(BINDIR)/asmd
+	install -m 755 asmdll.so $(DESTDIR)$(LIBDIR)
+	ln -s $(DESTDIR)$(BINDIR)/asmd $(DESTDIR)$(BINDIR)/asm
+
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/asm
+	rm -f $(DESTDIR)$(BINDIR)/asmd
+	rm -f $(DESTDIR)$(LIBDIR)/asmdll.so
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(LIBDIR) || true
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(BINDIR) || true
+
+info:
+	@echo "CFLAGS=${CFLAGS}"
+	@echo "LIBS=${LIBS}"

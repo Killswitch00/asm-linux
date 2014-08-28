@@ -1,0 +1,25 @@
+Code
+====
+UTF-8 character handling
+
+Documentation
+=============
+Write man pages
+
+Packaging
+=========
+Source
+Binary
+RPM
+Debian
+
+
+Server
+======
+SysV init script
+systemd service files
+
+
+Testing
+=======
+Test, test, test
