@@ -13,6 +13,14 @@ config.status
 Makefile
 autom4te.cache/
 src/.deps/
-
+src/.libs/
 config.h
 stamp-h1
+libtool
+
+# Build artefacts
+*.o
+*.lo
+*.la
+src/asm
+src/test
