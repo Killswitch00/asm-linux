@@ -1,4 +1,8 @@
+# Eclipse IDE files
+.autotools
 .project
 .cproject
 
+# Autotools output
+Makefile
 autom4te.cache/

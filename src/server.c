@@ -700,7 +700,7 @@ int asmserver()
 			syslog(LOG_INFO, "client %d connected\n", connected_clients);
 
 			while (running) {
-				syslog(LOG_INFO, "client %d recv() ...\n", connected_clients);
+				syslog(LOG_DEBUG, "client %d recv() ...\n", connected_clients);
 				rv = recv(client, req, 4, 0);
 
 				if (rv == 0) {
@@ -713,10 +713,10 @@ int asmserver()
 
 				// A zero "DWORD" (32-bits) is the magic word
 				if (*((uint32_t *)req) == 0) {
-					syslog(LOG_INFO, "client %d send_asi() ...\n", connected_clients);
+					syslog(LOG_DEBUG, "client %d send_asi() ...\n", connected_clients);
 					send_asi(client);
 				} else {
-					syslog(LOG_INFO, "client %d received %08x (%02x %02x %02x %02x)\n",
+					syslog(LOG_ERROR, "client %d received %08x (%02x %02x %02x %02x)\n",
 							connected_clients, *((uint32_t *)req), req[0], req[1], req[2], req[3]);
 				}
 			 	memset(req, 0xff, sizeof(req));
