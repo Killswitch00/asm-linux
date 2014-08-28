@@ -3,8 +3,16 @@
 .project
 .cproject
 
+#
+*.tar.gz
+*.tgz
+
 # Autotools output
 config.log
 config.status
 Makefile
 autom4te.cache/
+src/.deps/
+
+config.h
+stamp-h1

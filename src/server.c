@@ -716,7 +716,7 @@ int asmserver()
 					syslog(LOG_DEBUG, "client %d send_asi() ...\n", connected_clients);
 					send_asi(client);
 				} else {
-					syslog(LOG_ERROR, "client %d received %08x (%02x %02x %02x %02x)\n",
+					syslog(LOG_ERR, "client %d received %08x (%02x %02x %02x %02x)\n",
 							connected_clients, *((uint32_t *)req), req[0], req[1], req[2], req[3]);
 				}
 			 	memset(req, 0xff, sizeof(req));
