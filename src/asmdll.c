@@ -128,15 +128,18 @@ void __attribute ((destructor)) libasm_close(void)
 void RVExtension(char *output, int outputSize, const char *function)
 {
 	char *stopstring;
+	size_t funlen;
 
 	if (output == NULL || outputSize <= 0 || function == NULL) return;
-	if (strlen(function) == 0) return;
+	funlen = strnlen(function, FUNCTIONSIZE + 2);	// "<n>:<OCCx string>"
+	if (funlen == 0) return;
+	if (funlen == FUNCTIONSIZE + 2) return;
 
 	*output = '\0';
 
 	//syslog(LOG_INFO, "RVExtension(%p, %d, \"%s\")", output, outputSize, function);
 	if (!isdigit(*function)) {
-		while (1) {
+		do {
 			// Get version
 			if (strncasecmp(function, "version", sizeof("version")) == 0) {
 				snprintf(output, outputSize, "%s", ASM_VERSION); // return the RV extension version
@@ -147,12 +150,12 @@ void RVExtension(char *output, int outputSize, const char *function)
 				snprintf(output, outputSize, "%zd", InstanceID);
 				break;
 			}
-		}
+		} while (0);
 		output[outputSize - 1] = '\0';
 		return;
 	} else {
 		// function is supposed to be <digit>:<data>
-		if (function[1] != ':' || strlen(function) < 3) {
+		if (function[1] != ':' || funlen < 3) {
 			return;
 		}
 	}
