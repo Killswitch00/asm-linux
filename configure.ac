@@ -1,4 +1,4 @@
-AC_INIT([Arma Server Monitor], [0.1],[killswitch@dev-heaven.net],
+AC_INIT([Arma Server Monitor], [0.2],[killswitch@dev-heaven.net],
 	[armaservermonitor], [https://dev.withsix.com/projects/asm-linux/])
 AC_PREREQ([2.59])
 

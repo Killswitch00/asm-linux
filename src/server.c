@@ -482,7 +482,7 @@ void handle_signal(int s)
  *       (aka Little endian). That means that this function is technically
  *       non-portable to non-x86 architectures, since we do not use htons()
  *       et al to serialize the data before it is sent.
- *       (OTOTH, ArmA is strictly x86 anyhow)
+ *       (OTOH, ArmA is strictly x86 anyhow)
  */
 int send_asi(int clientfd)
 {
@@ -501,10 +501,11 @@ int send_asi(int clientfd)
 		asi = (struct ARMA_SERVER_INFO*)((unsigned char *)filemap + (instance * pagesize));
 
 		// Serialize the ARMA_SERVER_INFO struct data
-		*((unsigned short *)p) = asi->PID;           p += sizeof(unsigned short); // 2
 		if (asi->PID == 0 || asi->TICK_COUNT < DeadTimeOut) {
-			// The slot is either unused or dead - just send the PID field.
+			// The slot is either unused or dead - just send a zero PID field.
+			*((unsigned short *)p) = 0;                  p += sizeof(unsigned short); // 2
 		} else {
+			*((unsigned short *)p) = asi->PID;           p += sizeof(unsigned short); // 2
 			*((unsigned short *)p) = asi->OBJ_COUNT_0;   p += sizeof(unsigned short); // 4
 			*((unsigned short *)p) = asi->OBJ_COUNT_1;   p += sizeof(unsigned short); // 6
 			*((unsigned short *)p) = asi->OBJ_COUNT_2;   p += sizeof(unsigned short); // 8
