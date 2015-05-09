@@ -125,7 +125,7 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(bindir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 asmdll_la_LIBADD =
-am_asmdll_la_OBJECTS = asmdll.lo gettickcount.lo settings.lo
+am_asmdll_la_OBJECTS = asmdll.lo gettickcount.lo settings.lo util.lo
 asmdll_la_OBJECTS = $(am_asmdll_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -342,7 +342,7 @@ asm_SOURCES = asm.h asm.c client.h client.c gettickcount.h gettickcount.c \
 asm_CFLAGS = $(AM_CFLAGS)
 asm_LDFLAGS = -lrt -lm $(GLIB_LIBS)
 asmdll_la_SOURCES = asmdll.h asmdll.c gettickcount.h gettickcount.c \
- settings.h settings.c
+ settings.h settings.c util.h util.c
 
 asmdll_la_LDFLAGS = -avoid-version -module -lrt -lm $(GLIB_LIBS)
 test_SOURCES = test.c
@@ -518,6 +518,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gettickcount.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/settings.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

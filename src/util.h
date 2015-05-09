@@ -18,5 +18,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <arpa/inet.h>
+#include <syslog.h>
+
+extern int loglevel;
+
 
 void *get_in_addr(struct sockaddr *);
+
+void asmlog_open(const char *ident, int option, int facility);
+void asmlog(int level, const char *format, ...);
+void asmlog_close(void);

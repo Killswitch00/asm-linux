@@ -22,6 +22,7 @@
 #include "settings.h"
 #include "asmdll.h"
 #include "gettickcount.h"
+#include "util.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -53,18 +54,18 @@ void __attribute ((constructor)) libasm_open(void)
 {
 	int firstload = 0;
 
-	openlog("asmdll", LOG_CONS|LOG_ODELAY|LOG_PID, LOG_USER);
+	asmlog_open("asmdll", LOG_CONS|LOG_ODELAY|LOG_PID, LOG_USER);
 
 	pagesize = sysconf(_SC_PAGESIZE);
 	FileMapHandle = shm_open("/ASM_MapFile", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 
 	if (FileMapHandle < 0) {
-		syslog(LOG_ERR, "Could not create shared memory object: %s", strerror(errno));
+		asmlog(LOG_ERR, "Could not create shared memory object: %s", strerror(errno));
 		return;
 	}
 	memset(&filestat, 0, sizeof(filestat));
 	if (fstat(FileMapHandle, &filestat) != 0) {
-		syslog(LOG_ERR, "Could not fstat() the shared memory object: %s", strerror(errno));
+		asmlog(LOG_ERR, "Could not fstat() the shared memory object: %s", strerror(errno));
 		shm_unlink("/ASM_MapFile");
 		close(FileMapHandle);
 		return;
@@ -72,7 +73,7 @@ void __attribute ((constructor)) libasm_open(void)
 	if (filestat.st_size == 0) {
 		// First load of the extension - resize the shared memory for our needs
 		if (ftruncate(FileMapHandle, FILEMAPSIZE) != 0) {
-			syslog(LOG_ERR, "Could not set shared memory object size: %s", strerror(errno));
+			asmlog(LOG_ERR, "Could not set shared memory object size: %s", strerror(errno));
 			shm_unlink("/ASM_MapFile");
 			close(FileMapHandle);
 			return;
@@ -85,15 +86,15 @@ void __attribute ((constructor)) libasm_open(void)
 		FileMap = NULL;
 		shm_unlink("/ASM_MapFile");
 		close(FileMapHandle);
-		syslog(LOG_ERR, "Could not memory map the object: %s", strerror(errno));
+		asmlog(LOG_ERR, "Could not memory map the object: %s", strerror(errno));
 		return;
 	}
 
 	if (firstload) {
-		syslog(LOG_INFO, "first load - clearing shared memory area.");
+		asmlog(LOG_DEBUG, "first load - clearing shared memory area.");
 		memset(FileMap, 0, FILEMAPSIZE);
 	} else {
-		syslog(LOG_INFO, "existing shared memory area opened");
+		asmlog(LOG_DEBUG, "using existing shared memory area");
 	}
 
 	memset(&PCF, 0, sizeof(PCF));
@@ -103,7 +104,7 @@ void __attribute ((constructor)) libasm_open(void)
 
 	read_settings(); // ASM.ini
 
-	syslog(LOG_INFO, "asmdll loaded");
+	asmlog(LOG_INFO, "extension loaded");
 }
 
 
@@ -120,8 +121,8 @@ void __attribute ((destructor)) libasm_close(void)
 		shm_unlink("/ASM_MapFile");
 		close(FileMapHandle);
 	}
-	syslog(LOG_INFO, "asmdll unloaded");
-	closelog();
+	asmlog(LOG_INFO, "extension unloaded");
+	asmlog_close();
 }
 
 
@@ -137,7 +138,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 
 	*output = '\0';
 
-	//syslog(LOG_INFO, "RVExtension(%p, %d, \"%s\")", output, outputSize, function);
+	//asmlog(LOG_INFO, "RVExtension(%p, %d, \"%s\")", output, outputSize, function);
 	if (!isdigit(*function)) {
 		do {
 			// Get version
@@ -161,7 +162,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 	}
 
 	if (!FileMap) {
-	   syslog(LOG_ERR, "asmdll: no FileMap");
+	   asmlog(LOG_ERR, "no FileMap");
 	   return;
 	}
 
@@ -176,7 +177,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 					ArmaServerInfo->SERVER_FPSMIN =	FPSMIN;
 					ArmaServerInfo->TICK_COUNT    = gettickcount();
 
-					syslog(LOG_DEBUG, "0: FPS update");
+					asmlog(LOG_DEBUG, "0: FPS update");
 			}
 			break;
 
@@ -192,7 +193,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 					ArmaServerInfo->FSM_CE_FREQ = floor(conditionNo * 1000 / tnsec + 0.5);
 
 					PCS = PCE;
-					syslog(LOG_DEBUG, "1: CPS update");
+					asmlog(LOG_DEBUG, "1: CPS update");
 			}
 			break;
 
@@ -221,7 +222,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 					fclose(f);
 				}
 				ArmaServerInfo->MEM = rss * pagesize;
-				syslog(LOG_DEBUG, "2: GEN update");
+				asmlog(LOG_DEBUG, "2: GEN update");
 			}
 			break;
 
@@ -230,7 +231,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 				memset(ArmaServerInfo->MISSION, 0, SMALSTRINGSIZE);
 				strncpy(ArmaServerInfo->MISSION, &function[2], SMALSTRINGSIZE);
 				ArmaServerInfo->MISSION[SMALSTRINGSIZE-1] = 0;
-				syslog(LOG_DEBUG, "3: MISSION update");
+				asmlog(LOG_DEBUG, "3: MISSION update");
 			}
 			break;
 
@@ -239,7 +240,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 				unsigned obj;
 				obj = strtol(&function[2], &stopstring, 10);
 				ArmaServerInfo->OBJ_COUNT_0 = obj;
-				syslog(LOG_DEBUG, "4: OBJ_COUNT_0 update");
+				asmlog(LOG_DEBUG, "4: OBJ_COUNT_0 update");
 			}
 			break;
 
@@ -248,7 +249,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 				unsigned obj;
 				obj = strtol(&function[2], &stopstring, 10);
 				ArmaServerInfo->OBJ_COUNT_1 = obj;
-				syslog(LOG_DEBUG, "5: OBJ_COUNT_1 update");
+				asmlog(LOG_DEBUG, "5: OBJ_COUNT_1 update");
 			}
 			break;
 
@@ -257,14 +258,14 @@ void RVExtension(char *output, int outputSize, const char *function)
 				unsigned obj;
 				obj = strtol(&function[2], &stopstring, 10);
 				ArmaServerInfo->OBJ_COUNT_2 = obj;
-				syslog(LOG_DEBUG, "6: OBJ_COUNT_2 update");
+				asmlog(LOG_DEBUG, "6: OBJ_COUNT_2 update");
 			}
 			break;
 
 		case '9': // init
 			if (ArmaServerInfo == NULL) {
 				if (enableProfilePrefixSlotSelection > 0 && isdigit(function[2])) {
-					syslog(LOG_DEBUG, "selecting slot based on profileName...");
+					asmlog(LOG_DEBUG, "selecting slot based on profileName...");
 					// Select the instance based on the leading digit in the server's profile name
 					errno = 0;
 					InstanceID = strtol(&function[2], &stopstring, 10);
@@ -272,7 +273,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 						ArmaServerInfo = (struct ARMA_SERVER_INFO*)((unsigned char *)FileMap + (InstanceID * pagesize));
 					}
 				} else {
-					syslog(LOG_DEBUG, "finding available slot");
+					asmlog(LOG_DEBUG, "finding available slot");
 					// Find a free server info slot or re-use one if it hasn't been updated in the last 10 seconds
 					uint32_t DeadTimeout = gettickcount() - 10000;
 					for (InstanceID = 0 ; InstanceID < MAX_ARMA_INSTANCES ; InstanceID++) {
@@ -287,11 +288,11 @@ void RVExtension(char *output, int outputSize, const char *function)
 					memset(ArmaServerInfo->PROFILE, 0, sizeof(ArmaServerInfo->PROFILE));
 					strncpy(ArmaServerInfo->PROFILE, &function[2], sizeof(ArmaServerInfo->PROFILE));
 					ArmaServerInfo->PROFILE[sizeof(ArmaServerInfo->PROFILE) - 1] = '\0';
-					syslog(LOG_DEBUG, "9:init successful, pid %zd, initialized instance %d", ArmaServerInfo->PID, InstanceID);
+					asmlog(LOG_INFO, "init successful, pid %zd, using slot %d", ArmaServerInfo->PID, InstanceID);
 					snprintf(output, outputSize, "_ASM_OPT=[%s,%s,%s,\"%s\",\"%s\",\"%s\"];", OCI0, OCI1, OCI2, OCC0, OCC1, OCC2);
 				} else {
 					ArmaServerInfo = NULL;
-					syslog(LOG_ERR, "9:init failed - no available slots.");
+					asmlog(LOG_ERR, "init failed - no available slots.");
 					snprintf(output, outputSize, "_ASM_OPT=[0,0,0,\"\",\"\",\"\"];");
 				}
 				output[outputSize - 1] = '\0';
@@ -305,7 +306,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 	}
 	if (ArmaServerInfo != NULL) {
 		if (msync(ArmaServerInfo, pagesize, MS_ASYNC|MS_INVALIDATE) != 0) {
-	 	  	syslog(LOG_ERR, "msync(): %s", strerror(errno));
+			asmlog(LOG_ERR, "msync(): %s", strerror(errno));
 		}
 	}
 	return;
