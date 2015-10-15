@@ -52,9 +52,11 @@ void asmlog(int level, const char* format, ...)
 	}
 
 	va_start(ap, format);
+	
 	if (level >= LOG_ERR) {
-	vsyslog(level, format, ap);
+		vsyslog(level, format, ap);
 	}
+	
 	if (level <= loglevel) {
 		fprintf(os,"asmdll: ");
 		vfprintf(os, format, ap);
