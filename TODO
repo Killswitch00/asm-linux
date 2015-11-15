@@ -23,3 +23,9 @@ systemd service files
 Testing
 =======
 Test, test, test
+
+Logging?
+========
+TimeStamp|FPS|CPS|PL#|AIL|AIR|OC0|OC1|OC2
+16:46:31|49,8| 5,1|1|65|7|60|22|0
+

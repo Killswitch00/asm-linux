@@ -19,6 +19,8 @@
  */
 
 #include "asm.h"
+#include "asmlog.h"
+#include "config.h"
 #include "util.h"
 
 #include <arpa/inet.h>
@@ -52,6 +54,7 @@ int asmclient(int instance_set)
 	char request[4] = {0, 0, 0, 0};
 	struct ARMA_SERVER_INFO *asi = 0;
 
+	asmlog_info(PACKAGE_STRING);
 
 	memset(buf, 0, sizeof(buf));
 	memset(&hints, 0, sizeof(hints));
@@ -62,23 +65,23 @@ int asmclient(int instance_set)
 
 	snprintf(portnum, 6, "%d", port);
 
-	printf("Connecting to %s:%s\n", host, portnum);
+	asmlog_info("Connecting to %s:%d", host, port);
 
 	if ((rv = getaddrinfo(*host == '\0' ? "localhost" : host, portnum, &hints, &serverinfo)) !=0 ) {
-		perror("asmclient(): getaddrinfo");
+		asmlog_error("asmclient: getaddrinfo, %s", gai_strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	for (p = serverinfo; p != NULL; p = p->ai_next) {
 		if ((server = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-			perror("asmclient(): socket");
+			asmlog_error("asmclient: socket, %s", strerror(errno));
 			continue;
 		}
 
 		if (connect(server, p->ai_addr, p->ai_addrlen) == -1) {
 			close(server);
 			if (errno != ECONNREFUSED) {
-				fprintf(stderr, "asmclient: connect, %s (%d)\n", strerror(errno), errno);
+				asmlog_error("asmclient: connect, %s (%d)", strerror(errno), errno);
 			}
 			continue;
 		}
@@ -86,7 +89,7 @@ int asmclient(int instance_set)
 	}
 
 	if (p == NULL) {
-		fprintf(stderr, "Could not connect to %s:%d\n", host, port);
+		asmlog_error("Could not connect to %s:%d", host, port);
 		return EXIT_FAILURE;
 	}
 
@@ -101,7 +104,7 @@ int asmclient(int instance_set)
 			rv = send(server, (void *)request, remaining, 0);
 			if (rv == -1) {
 				if (errno != EINTR) {
-					fprintf(stderr, "asmclient(): send(), %s\n", strerror(errno));
+					asmlog_error("asmclient: send, %s", strerror(errno));
 				}
 				break;
 			}
@@ -118,7 +121,7 @@ int asmclient(int instance_set)
 		}
 		if (rv == -1) {
 			if (errno != EINTR) {
-				fprintf(stderr, "asmclient():recv(), %s\n", strerror(errno));
+				asmlog_error("asmclient: recv, %s", strerror(errno));
 			}
 			continue;
 		}
@@ -132,29 +135,29 @@ int asmclient(int instance_set)
 		} else {
 			bp = buf + (4 * (instance_set - 1));
 		}
-		fprintf(stderr, "Displaying stats for %d instances...\n", count);
+		asmlog_info("Displaying stats for %d instances...", count);
 		// FIXME: consider that the received data for inactive instances
 		//        is only the PID field.
 		for (instance = 0; instance < count; instance++) {
 			asi = (struct ARMA_SERVER_INFO*)(bp + (instance * sizeof(struct ARMA_SERVER_INFO)));
-			printf("============================ server %2d\n", instance + 1);
-			printf("PID = %zd\n", asi->PID);
-			printf("OC0 = %zd\n", asi->OBJ_COUNT_0);
-			printf("OC1 = %zd\n", asi->OBJ_COUNT_1);
-			printf("OC2 = %zd\n", asi->OBJ_COUNT_2);
-			printf("PLC = %zd\n", asi->PLAYER_COUNT);
-			printf("AIL = %zd\n", asi->AI_LOC_COUNT);
-			printf("AIR = %zd\n", asi->AI_REM_COUNT);
-			printf("FPS = %zd\n", asi->SERVER_FPS);
-			printf("MIN = %zd\n", asi->SERVER_FPSMIN);
-			printf("CPS = %zd\n", asi->FSM_CE_FREQ);
-			printf("MEM = %zd\n", asi->MEM / (1024*1024));
-			printf("NTI = %zd\n", asi->NET_RECV);
-			printf("NTO = %zd\n", asi->NET_SEND);
-			printf("DIR = %zd\n", asi->DISC_READ);
-			printf("TICK = %zd\n", asi->TICK_COUNT);
-			printf("MISSION = \"%s\"\n", asi->MISSION);
-			printf("PROFILE = \"%s\"\n", asi->PROFILE);
+			asmlog_info("============================ server %2d", instance + 1);
+			asmlog_info("PID = %zd", asi->PID);
+			asmlog_info("OC0 = %zd", asi->OBJ_COUNT_0);
+			asmlog_info("OC1 = %zd", asi->OBJ_COUNT_1);
+			asmlog_info("OC2 = %zd", asi->OBJ_COUNT_2);
+			asmlog_info("PLC = %zd", asi->PLAYER_COUNT);
+			asmlog_info("AIL = %zd", asi->AI_LOC_COUNT);
+			asmlog_info("AIR = %zd", asi->AI_REM_COUNT);
+			asmlog_info("FPS = %zd", asi->SERVER_FPS);
+			asmlog_info("MIN = %zd", asi->SERVER_FPSMIN);
+			asmlog_info("CPS = %zd", asi->FSM_CE_FREQ);
+			asmlog_info("MEM = %zd", asi->MEM / (1024*1024));
+			asmlog_info("NTI = %zd", asi->NET_RECV);
+			asmlog_info("NTO = %zd", asi->NET_SEND);
+			asmlog_info("DIR = %zd", asi->DISC_READ);
+			asmlog_info("TICK = %zd", asi->TICK_COUNT);
+			asmlog_info("MISSION = \"%s\"", asi->MISSION);
+			asmlog_info("PROFILE = \"%s\"", asi->PROFILE);
 
 			// instance|TimeStamp|FPS|CPS|PL#|AIL|AIR|OC0|OC1|OC2
 			if (log_file) {

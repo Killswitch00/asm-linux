@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Killswitch
+ * Copyright 2015 Killswitch
  *
  * This file is part of Arma Server Monitor for Linux.
  *
@@ -17,6 +17,22 @@
  * License along with Arma Server Monitor for Linux; if not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <arpa/inet.h>
+#ifndef ASMLOG_H_
+#define ASMLOG_H_
 
-void *get_in_addr(struct sockaddr *);
+extern int asmlog_level;
+
+void asmlog_stdout(const char* name);
+void asmlog_syslog(const char* name);
+
+void asmlog_enable_debug();
+
+#define ASMLOG(x) void asmlog_x (const char* format, ...)
+ASMLOG(critical);
+ASMLOG(error);
+ASMLOG(warning);
+ASMLOG(notice);
+ASMLOG(info);
+ASMLOG(debug);
+
+#endif /* ASMLOG_H_ */

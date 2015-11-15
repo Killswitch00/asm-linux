@@ -125,7 +125,8 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(bindir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 asmdll_la_LIBADD =
-am_asmdll_la_OBJECTS = asmdll.lo gettickcount.lo settings.lo util.lo
+am_asmdll_la_OBJECTS = asmdll.lo asmlog.lo gettickcount.lo settings.lo \
+	util.lo
 asmdll_la_OBJECTS = $(am_asmdll_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -135,9 +136,9 @@ asmdll_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(asmdll_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
-am_asm_OBJECTS = asm-asm.$(OBJEXT) asm-client.$(OBJEXT) \
-	asm-gettickcount.$(OBJEXT) asm-server.$(OBJEXT) \
-	asm-settings.$(OBJEXT) asm-util.$(OBJEXT)
+am_asm_OBJECTS = asm-asm.$(OBJEXT) asm-asmlog.$(OBJEXT) \
+	asm-client.$(OBJEXT) asm-gettickcount.$(OBJEXT) \
+	asm-server.$(OBJEXT) asm-settings.$(OBJEXT) asm-util.$(OBJEXT)
 asm_OBJECTS = $(am_asm_OBJECTS)
 asm_LDADD = $(LDADD)
 asm_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -336,13 +337,14 @@ pkglib_LTLIBRARIES = asmdll.la
 
 # TODO: run the test program during "make check"
 #TESTS = ...
-asm_SOURCES = asm.h asm.c client.h client.c gettickcount.h gettickcount.c \
- server.h server.c settings.h settings.c util.h util.c
+asm_SOURCES = asm.h asm.c asmlog.h asmlog.c client.h client.c \
+ gettickcount.h gettickcount.c server.h server.c \
+ settings.h settings.c util.h util.c
 
 asm_CFLAGS = $(AM_CFLAGS)
 asm_LDFLAGS = -lrt -lm $(GLIB_LIBS)
-asmdll_la_SOURCES = asmdll.h asmdll.c gettickcount.h gettickcount.c \
- settings.h settings.c util.h util.c
+asmdll_la_SOURCES = asmdll.h asmdll.c asmlog.h asmlog.c \
+ gettickcount.h gettickcount.c settings.h settings.c util.h util.c
 
 asmdll_la_LDFLAGS = -avoid-version -module -lrt -lm $(GLIB_LIBS)
 test_SOURCES = test.c
@@ -509,12 +511,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-asm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-asmlog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-gettickcount.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-settings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asmdll.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asmlog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gettickcount.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/settings.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
@@ -554,6 +558,20 @@ asm-asm.obj: asm.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asm.c' object='asm-asm.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-asm.obj `if test -f 'asm.c'; then $(CYGPATH_W) 'asm.c'; else $(CYGPATH_W) '$(srcdir)/asm.c'; fi`
+
+asm-asmlog.o: asmlog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-asmlog.o -MD -MP -MF $(DEPDIR)/asm-asmlog.Tpo -c -o asm-asmlog.o `test -f 'asmlog.c' || echo '$(srcdir)/'`asmlog.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-asmlog.Tpo $(DEPDIR)/asm-asmlog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asmlog.c' object='asm-asmlog.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-asmlog.o `test -f 'asmlog.c' || echo '$(srcdir)/'`asmlog.c
+
+asm-asmlog.obj: asmlog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-asmlog.obj -MD -MP -MF $(DEPDIR)/asm-asmlog.Tpo -c -o asm-asmlog.obj `if test -f 'asmlog.c'; then $(CYGPATH_W) 'asmlog.c'; else $(CYGPATH_W) '$(srcdir)/asmlog.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-asmlog.Tpo $(DEPDIR)/asm-asmlog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asmlog.c' object='asm-asmlog.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-asmlog.obj `if test -f 'asmlog.c'; then $(CYGPATH_W) 'asmlog.c'; else $(CYGPATH_W) '$(srcdir)/asmlog.c'; fi`
 
 asm-client.o: client.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-client.o -MD -MP -MF $(DEPDIR)/asm-client.Tpo -c -o asm-client.o `test -f 'client.c' || echo '$(srcdir)/'`client.c

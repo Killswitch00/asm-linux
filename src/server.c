@@ -19,6 +19,8 @@
  */
 
 #include "asm.h"
+#include "asmlog.h"
+#include "config.h"
 #include "server.h"
 #include "settings.h"
 #include "util.h"
@@ -38,7 +40,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 #include <sys/file.h>
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -80,12 +81,12 @@ int init_shmem()
 	filemap_fd = shm_open("/ASM_MapFile", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 
 	if (filemap_fd < 0) {
-		perror("Could not create shared memory object");
+		asmlog_error("Could not create shared memory object, %s", strerror(errno));
 		return 1;
 	}
 	memset(&filestat, 0, sizeof(filestat));
 	if (fstat(filemap_fd, &filestat) != 0) {
-		perror("Could not fstat() the shared memory object");
+		asmlog_error("Could not fstat() the shared memory object, %s", strerror(errno));
 		(void)shm_unlink("/ASM_MapFile");
 		(void)close(filemap_fd);
 		return 1;
@@ -93,7 +94,7 @@ int init_shmem()
 	if (filestat.st_size == 0) {
 		// First load of the extension - resize the shared memory for our needs
 		if (ftruncate(filemap_fd, FILEMAPSIZE) != 0) {
-			perror("Could not set shared memory object size");
+			asmlog_error("Could not set shared memory object size, %s", strerror(errno));
 			shm_unlink("/ASM_MapFile");
 			close(filemap_fd);
 			return 1;
@@ -106,13 +107,13 @@ int init_shmem()
 		filemap = NULL;
 		shm_unlink("/ASM_MapFile");
 		close(filemap_fd);
-		perror("Could not memory map the object");
+		asmlog_error("Could not memory map the object, %s", strerror(errno));
 		return 1;
 	}
 
 	if (firstload == 1) {
 		memset(filemap, 0, FILEMAPSIZE);
-		printf("%s: shared memory initialized\n", prog_name);
+		asmlog_info("Shared memory initialized");
 	}
 
 	return 0;
@@ -150,7 +151,7 @@ int already_running(pid_t pid, char *progname)
 	f = fopen(procpath, "r");
 	if (f == NULL) {
 		if (errno != ENOENT) {
-			syslog(LOG_ERR, "Could not open \"%s\": %s", procpath, strerror(errno));
+			asmlog_error("Could not open \"%s\": %s", procpath, strerror(errno));
 			rv = -1;
 		}
 		memset(procpath, 0, sizeof(procpath));
@@ -184,25 +185,25 @@ int PID_start()
 			snprintf(pid_name, pid_name_len, "./%s.pid", prog_name);
 		}
 	}
-	syslog(LOG_INFO, "PID_start: prog_name = %s, pid_name = \"%s\"\n", prog_name, pid_name);
+	asmlog_debug("PID_start: prog_name = %s, pid_name = \"%s\"", prog_name, pid_name);
 
 
 	fd = open(pid_name, O_CREAT|O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (fd == -1) {
-		syslog(LOG_ERR, "Cannot open PID file: \"%s\"", pid_name);
+		asmlog_error("Cannot open PID file: \"%s\"", pid_name);
 		return 1;
 	}
 
 	// Block und lock
 	if (flock(fd, LOCK_EX) == -1) {
-		syslog(LOG_ERR, "Cannot lock PID file: \"%s\"", pid_name);
+		asmlog_error("Cannot lock PID file: \"%s\"", pid_name);
 		close(fd);
 		return 1;
 	}
 
 	pf = fdopen(fd, "r+");
 	if (pf == NULL) {
-		syslog(LOG_ERR, "Cannot open PID file: \"%s\"", pid_name);
+		asmlog_error("Cannot open PID file: \"%s\"", pid_name);
 		flock(fd, LOCK_UN);
 		close(fd);
 		return 1;
@@ -217,7 +218,7 @@ int PID_start()
 			 *  If it's another instance of this daemon, GTFO.
 			 */
 			if (already_running(pid, prog_name) == 1) {
-				syslog(LOG_ERR, "An instance of %s is already running", prog_name);
+				asmlog_error("An instance of %s is already running", prog_name);
 				flock(fd, LOCK_UN);
 				fclose(pf);
 				return 1;
@@ -228,7 +229,7 @@ int PID_start()
 		flock(fd, LOCK_UN);
 		fclose(pf);
 		pid_name_created = 1;
-		syslog(LOG_INFO, "PID %zd written to %s\n", pid, pid_name);
+		asmlog_info("PID %zd written to %s", pid, pid_name);
 	}
 	return 0;
 }
@@ -238,9 +239,9 @@ void PID_stop()
 {
 	if (pid_name_created && pid_name) {
 		if (unlink(pid_name)) {
-			syslog(LOG_ERR, "Could not remove PID file \"%s\"\n", pid_name);
+			asmlog_error("Could not remove PID file \"%s\"", pid_name);
 		} else {
-			syslog(LOG_INFO, "%s was removed\n", pid_name);
+			asmlog_info("%s was removed", pid_name);
 		}
 		memset(pid_name, 0, pid_name_len);
 		pid_name_created = 0;
@@ -320,7 +321,7 @@ void daemonize()
 	// 1. Close all open file descriptors except stdin, stdout, stderr
 	i = scandir("/proc/self/fd", &dirlist, 0, alphasort);
 	if (i < 0) {
-		syslog(LOG_ERR, "daemonize: scandir");
+		asmlog_error("daemonize: scandir");
 		_exit(errno);
 	}
 	while (i--) {
@@ -348,7 +349,7 @@ void daemonize()
 	if ((pid = fork()) < 0) {
 		close(pf1[0]);
 		close(pf1[1]);
-		syslog(LOG_ERR, "daemonize: fork");
+		asmlog_error("daemonize: fork");
 		exit(errno);
 	};
 
@@ -362,7 +363,7 @@ void daemonize()
 		// 6 Child process Mk.I - call setsid()
 		if (setsid() < 0) {
 			close(pf1[1]);
-			syslog(LOG_ERR, "daemonize: setsid");
+			asmlog_error("daemonize: setsid");
 			_exit(errno);
 		}
 
@@ -373,7 +374,7 @@ void daemonize()
 			close(pf1[1]);
 			close(pf2[0]);
 			close(pf2[1]);
-			syslog(LOG_ERR, "daemonize: fork 2");
+			asmlog_error("daemonize: fork 2");
 			_exit(errno);
 		}
 
@@ -398,7 +399,7 @@ void daemonize()
 		fd0 = open("/dev/null", O_RDWR);
 		fd1 = dup(0);
 		fd2 = dup(0);
-		//syslog(LOG_INFO, "daemonize: new fd0 = %d", fd0);
+		//asmlog_info("daemonize: new fd0 = %d", fd0);
 
 		// 10 Clear the file creation mask
 		umask(0);
@@ -406,7 +407,7 @@ void daemonize()
 		// 11 If we are running as a system service, change
 		//    the current dir to the root directory
 		if (geteuid() == 0 && chdir("/") < 0) {
-			syslog(LOG_ERR, "daemonize: chdir");
+			asmlog_error("daemonize: chdir");
 			close(fd2);
 			close(fd1);
 			close(fd0);
@@ -424,7 +425,7 @@ void daemonize()
 		// 14 Notify the original process that we're done
 		pid = getpid();
 		write(pf2[1], &pid, sizeof(pid_t));
-		//syslog(LOG_INFO, "daemonize, child 2 init DONE: %d bytes written", i);
+		//asmlog_info("daemonize, child 2 init DONE: %d bytes written", i);
 		close(pf2[1]);
 	} else {
 		// Parent. 15 Wait for the daemon child to finish initialization and then exit.
@@ -432,7 +433,7 @@ void daemonize()
 		i = read(pf1[0], &daemon_pid, sizeof(pid_t));
 		close(pf1[0]);
 		wait(&status);
-		syslog(LOG_INFO, "daemonize: parent DONE, %d bytes read, daemon is %zd, first child returned %d", i, daemon_pid, status);
+		asmlog_debug("daemonize: parent DONE, %d bytes read, daemon is %zd, first child returned %d", i, daemon_pid, status);
 		_exit(status);
 	}
 
@@ -458,18 +459,18 @@ void handle_signal(int s)
 			/* TODO: re-read config.
 			 * Could be used to re-initalize the service if the need arises.
 			 */
-			syslog(LOG_DEBUG, "PID %d: got SIGHUP", getpid());
+			asmlog_debug("PID %d: got SIGHUP", getpid());
 			break;
 		case SIGINT:
-			syslog(LOG_DEBUG, "PID %d: got SIGINT", getpid());
+			asmlog_debug("PID %d: got SIGINT", getpid());
 			running = 0;
 			break;
 		case SIGTERM:
-			syslog(LOG_DEBUG, "PID %d: got SIGTERM", getpid());
+			asmlog_debug("PID %d: got SIGTERM", getpid());
 			running = 0;
 			break;
 		default:
-			syslog(LOG_INFO, "PID %d, got signal %d\n", getpid(), s);
+			asmlog_info("PID %d, got signal %d", getpid(), s);
 			break;
 	}
 }
@@ -493,14 +494,14 @@ int send_asi(int clientfd)
 	unsigned char sendbuf[MAX_ARMA_INSTANCES * sizeof(struct ARMA_SERVER_INFO)];
 	unsigned char* p = NULL;
 
-	//syslog(LOG_INFO, "send_asi: struct ARMA_SERVER_INFO is %zd bytes.\n", sizeof(struct ARMA_SERVER_INFO));
+	//asmlog_info("send_asi: ARMA_SERVER_INFO is %zd bytes.", sizeof(struct ARMA_SERVER_INFO));
 	memset(sendbuf, 0, sizeof(sendbuf));
 	p = sendbuf;
 	DeadTimeOut = gettickcount() - 10000;
 	for (instance = 0; instance < MAX_ARMA_INSTANCES; instance++) {
 		asi = (struct ARMA_SERVER_INFO*)((unsigned char *)filemap + (instance * pagesize));
 
-		// Serialize the ARMA_SERVER_INFO struct data
+		// Serialize the ARMA_SERVER_INFO data
 		if (asi->PID == 0 || asi->TICK_COUNT < DeadTimeOut) {
 			// The slot is either unused or dead - just send a zero PID field.
 			*((unsigned short *)p) = 0;                  p += sizeof(unsigned short); // 2
@@ -525,12 +526,12 @@ int send_asi(int clientfd)
 		}
 	}
 	remaining = p - sendbuf;
-	//syslog(LOG_INFO, "send_asi: %d sending %zd", instance + 1, remaining);
+	//asmlog_debug("send_asi: %d sending %zd", instance + 1, remaining);
 	do {
 		int sent = send(clientfd, (void *)sendbuf, remaining, 0);
 		if (sent == -1) {
 			if (errno != EINTR) {
-				syslog(LOG_ERR, "send_asi, send()");
+				asmlog_error("send_asi, send()");
 				status = 1;
 			}
 			break;
@@ -558,24 +559,24 @@ int asmserver()
 	char s[INET6_ADDRSTRLEN];
 	pid_t pid;
 
+	asmlog_info(PACKAGE_STRING);
+
 	if (read_settings()) {
-		fprintf(stderr, "Could not read the ASM.ini settings file\n");
+		asmlog_error("Could not read the ASM.ini settings file");
 		return EXIT_FAILURE;
 	}
 
 	// Open the shared memory area
 	if (init_shmem()) {
-		fprintf(stderr, "Could not initalize the shared memory area\n");
+		asmlog_error("Could not initalize the shared memory area");
 		return EXIT_FAILURE;
 	}
 
-	openlog(prog_name, LOG_CONS|LOG_ODELAY|LOG_PID, LOG_USER);
-
-	//syslog(LOG_INFO, "asmserver(): daemonize begin");
 	if (sysv_daemon) {
+		asmlog_debug("asmserver(): daemonize begin");
 		daemonize();
+		asmlog_debug("asmserver(): daemonize done");
 	}
-	//syslog(LOG_INFO, "asmserver(): daemonize done");
 
 	hints.ai_family   = AF_UNSPEC;   // IPv4 and IPv6
 	hints.ai_socktype = SOCK_STREAM; // TCP
@@ -584,7 +585,7 @@ int asmserver()
 	snprintf(portnum, PORT_STRLEN, "%d", port);
 
 	if ((rv = getaddrinfo(*host == '\0' ? NULL : host, portnum, &hints, &address_list)) != 0) {
-	    syslog(LOG_ERR, "asmserver(): getaddrinfo, %s", gai_strerror(rv));
+	    asmlog_error("asmserver(): getaddrinfo, %s", gai_strerror(rv));
 	    return EXIT_FAILURE;	// FIXME: cleanup
 	}
 
@@ -593,20 +594,20 @@ int asmserver()
 	{
 		server = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 		if (server == -1) {
-			syslog(LOG_ERR, "asmserver(): socket, %s", strerror(errno));
+			asmlog_error("asmserver(): socket, %s", strerror(errno));
 			continue;
 		}
 
 		if (setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
 		{
 			close(server);
-			syslog(LOG_ERR, "asmserver(): setsockopt");
+			asmlog_error("asmserver(): setsockopt");
 			return EXIT_FAILURE;		// FIXME: cleanup
 		}
 
 		if (bind(server, p->ai_addr, p->ai_addrlen) == -1) {
 			close(server);
-			syslog(LOG_ERR, "asmserver(): bind");
+			asmlog_error("asmserver(): bind");
 			continue;
 		}
 
@@ -615,14 +616,14 @@ int asmserver()
 
 	if (p == NULL)
 	{
-		syslog(LOG_ERR, "server(): failed to bind\n");
+		asmlog_error("server(): failed to bind");
 	    return EXIT_FAILURE; // FIXME: cleanup
 	}
 
 	freeaddrinfo(address_list);
 
 	if (listen(server, max_clients) == -1) {
-		syslog(LOG_ERR, "listen");
+		asmlog_error("listen");
 		close(server);
 	    return EXIT_FAILURE;
 	}
@@ -632,7 +633,7 @@ int asmserver()
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_NOCLDSTOP;
 	if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-		syslog(LOG_ERR, "sigaction");
+		asmlog_error("sigaction");
 		close(server);
 	    return EXIT_FAILURE;
 	}
@@ -645,17 +646,16 @@ int asmserver()
 	sigaction(SIGTERM, &sa, NULL);
 
 	// Wait for connections
-	// st=0: %s\n", *host == '\0' ? "yes" : "no");
 	running = 1;
 	size = sizeof(client_addr);
 
 	while (running) {  // main accept() loop
-		syslog(LOG_INFO, "server: waiting for connections\n");
+		asmlog_info("Waiting for connections");
 
 		int client = accept(server, (struct sockaddr *)&client_addr, &size);
 		if (client == -1) {
 			if (errno != EINTR) {
-				syslog(LOG_ERR, "accept");
+				asmlog_error("accept");
 			}
 			continue;
 		}
@@ -670,11 +670,11 @@ int asmserver()
 
 		// TODO: use TCP Wrappers to let sysadmins accept or deny connections
 
-		syslog(LOG_INFO, "server: got connection from %s\n", s);
+		asmlog_info("Got connection from %s", s);
 
 		if ((pid = fork()) < 0) {
 			/* MURPHY */
-			syslog(LOG_ERR, "server: fork, %s", strerror(errno));
+			asmlog_error("fork, %s", strerror(errno));
 			close(client);
 			running = 0;
 			continue;
@@ -698,10 +698,10 @@ int asmserver()
 				memset(args[i], 0, strlen(args[i]));
 			}
 
-			syslog(LOG_INFO, "client %d connected\n", connected_clients);
+			asmlog_info("Client %d connected", connected_clients);
 
 			while (running) {
-				syslog(LOG_DEBUG, "client %d recv() ...\n", connected_clients);
+				asmlog_debug("Client %d recv() ...", connected_clients);
 				rv = recv(client, req, 4, 0);
 
 				if (rv == 0) {
@@ -714,17 +714,17 @@ int asmserver()
 
 				// A zero "DWORD" (32-bits) is the magic word
 				if (*((uint32_t *)req) == 0) {
-					syslog(LOG_DEBUG, "client %d send_asi() ...\n", connected_clients);
+					asmlog_debug("Client %d send_asi() ...", connected_clients);
 					send_asi(client);
 				} else {
-					syslog(LOG_ERR, "client %d received %08x (%02x %02x %02x %02x)\n",
+					asmlog_error("Client %d received %08x (%02x %02x %02x %02x)",
 							connected_clients, *((uint32_t *)req), req[0], req[1], req[2], req[3]);
 				}
 			 	memset(req, 0xff, sizeof(req));
 			 }
 
 			close(client);
-			syslog(LOG_INFO, "client %d disconnected\n", connected_clients);
+			asmlog_info("Client %d disconnected", connected_clients);
 			closelog();
 			_exit(0);
 		} else {
@@ -733,7 +733,7 @@ int asmserver()
 		}
 	}
 
-	syslog(LOG_INFO, "server: exiting\n");
+	asmlog_info("Server exiting");
 
 	if (server > -1) {
 		close(server);
@@ -741,7 +741,7 @@ int asmserver()
 
 	PID_stop();
 	close_shmem();
-	closelog();
+	asmlog_close();
 
 	return EXIT_SUCCESS;
 }

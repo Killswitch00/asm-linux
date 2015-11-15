@@ -25,9 +25,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 
 #include "asm.h"
+#include "asmlog.h"
 #include "util.h"
 
 // Settings and their default values
@@ -131,7 +131,7 @@ int read_settings(void)
 			int ival;
 			gchar *value;
 
-			asmlog(LOG_INFO, "reading settings from %s", inipath);
+			asmlog_info("Reading settings from %s", inipath);
 
 			value = g_key_file_get_string(settings, "ASM", "enableAPImonitoring", NULL);
 			if (value != NULL)
@@ -199,7 +199,7 @@ int read_settings(void)
 		}
 		else
 		{
-			asmlog(LOG_ERR, "no ASM.ini file could be loaded - using default values.");
+			asmlog_warning("No ASM.ini file could be loaded - using default values.");
 		}
 		g_key_file_free(settings);
 	}

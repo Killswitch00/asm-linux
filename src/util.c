@@ -18,12 +18,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <arpa/inet.h>
-#include <time.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <syslog.h>
-
-int loglevel = LOG_INFO;
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -33,40 +27,4 @@ void *get_in_addr(struct sockaddr *sa)
     }
 
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-void asmlog_open(const char *ident, int option, int facility)
-{
-	openlog(ident, option, facility);
-}
-
-void asmlog(int level, const char* format, ...)
-{
-	va_list ap;
-	FILE* os;
-
-	if (level <= LOG_ERR) {
-		os = stderr;
-	} else {
-		os = stdout;
-	}
-
-	va_start(ap, format);
-	
-	if (level >= LOG_ERR) {
-		vsyslog(level, format, ap);
-	}
-	
-	if (level <= loglevel) {
-		fprintf(os,"asmdll: ");
-		vfprintf(os, format, ap);
-		fprintf(os,"\n");
-		fflush(os);
-	}
-	va_end(ap);
-}
-
-void asmlog_close(void)
-{
-	closelog();
 }

@@ -46,6 +46,7 @@ int    server = 0;
 int    client = 1;
 int    max_clients  = 1;
 int    sysv_daemon  = 0;
+int    systemd      = 0;
 int    instance_set = 0; // 0...3, which set of 4 instances should be reported by the client?
 
 char*  host;
@@ -67,14 +68,17 @@ void usage(const char* prog_name)
  *  -i      PID file
  *  -o      When running as a client, Which set of four instances shall be reported? range 0..3, (default: 0)
  *
- *  -d      Do a SysV style daemonization when running as a server. (Default: don't - run as a systemd service)
+ *  -d      Enable debug-level log messages
+ *  -b      (server) Run in the background as a SysV style daemon.
+ *  -y      (server) Run as a systemd service, logging to stdout
+ *
  */
 int main(int argc, char** argv)
 {
-	int option, flag, usage_error, c_seen, s_seen, status = EXIT_SUCCESS;
+	int option, flag, usage_error, status = EXIT_SUCCESS;
+	int c_seen, b_seen, s_seen, y_seen;
 
-	c_seen = 0;
-	s_seen = 0;
+	c_seen = b_seen = s_seen = y_seen = 0;
 	usage_error = 0;
 
 	if ((prog_name = strdup(basename(argv[0]))) == NULL) {
@@ -102,8 +106,13 @@ int main(int argc, char** argv)
 		goto cleanup;
 	}
 
-	while (usage_error == 0 && (option = getopt(argc, argv, "ch:i:l::n:o:p:st:")) != -1) {
+	while (usage_error == 0 && (option = getopt(argc, argv, "bcdh:i:l::n:o:p:st:y")) != -1) {
 		switch (option) {
+			case 'b':
+				sysv_daemon = 1;
+				b_seen = 1;
+				if (y_seen == 1) usage_error = 1;
+				break;
 			case 'c':
 				server = 0;
 				client = 1;
@@ -111,7 +120,7 @@ int main(int argc, char** argv)
 				if (s_seen == 1) usage_error = 1;
 				break;
 			case 'd':
-				sysv_daemon = 1;
+				asmlog_enable_debug();
 				break;
 			case 'h':
 				strncpy(host, optarg, INET6_ADDRSTRLEN);
@@ -175,6 +184,10 @@ int main(int argc, char** argv)
 					usage_error = 1;
 				}
 				break;
+			case 'y':
+				systemd = 1;
+				if (b_seen == 1) usage_error = 1;
+				break;
 			default:
 				usage_error = 1;
 		}
@@ -195,7 +208,7 @@ int main(int argc, char** argv)
 			strcpy(log_name, "./asm.log");
 		}
 	}
-
+#ifdef SHOW_OPTIONS
 	printf("client:      %d\n", client);
 	printf("server:      %d\n", server);
 	printf("max clients: %d\n", max_clients);
@@ -203,8 +216,15 @@ int main(int argc, char** argv)
 	printf("port:        %d\n", port);
 	printf("log file:    %s\n", log_name);
 	printf("interval:    %d\n", log_interval);
-
+#endif
 	if (server) {
+		if (sysv_daemon) {
+			asmlog_syslog(prog_name);
+		} else if (systemd) {
+			asmlog_systemd(prog_name);
+		} else {
+			asmlog_console();
+		}
 		// Work as a service
 		status = asmserver();
 	} else {
@@ -216,6 +236,7 @@ int main(int argc, char** argv)
 				goto cleanup;
 			}
 		}
+		asmlog_console();
 
 		// Client: connect to server and receive stats
 		status = asmclient(instance_set);

@@ -1,5 +1,5 @@
-AC_INIT([Arma Server Monitor], [0.3],[killswitch@dev-heaven.net],
-	[armaservermonitor], [https://dev.withsix.com/projects/asm-linux/])
+AC_INIT([Arma Server Monitor], [0.4],[killswitch@zeus-community.net],
+	[armaservermonitor], [https://github.com/Killswitch00/asm-linux])
 AC_PREREQ([2.59])
 
 AC_CONFIG_SRCDIR([src/asm.c])
