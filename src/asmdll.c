@@ -49,7 +49,7 @@ static uint32_t InstanceID;
 
 static struct ARMA_SERVER_INFO *ArmaServerInfo = NULL;
 static struct stat filestat;
-static struct timespec PCF, PCS;
+static struct timespec T0;
 
 void __attribute ((constructor)) libasm_open(void)
 {
@@ -104,10 +104,8 @@ void __attribute ((constructor)) libasm_open(void)
 		asmlog_debug("using existing shared memory area");
 	}
 
-	memset(&PCF, 0, sizeof(PCF));
-	memset(&PCS, 0, sizeof(PCS));
-	clock_gettime(CLOCK_MONOTONIC, &PCF);
-	clock_gettime(CLOCK_MONOTONIC, &PCS);
+	memset(&T0, 0, sizeof(T0));
+	clock_gettime(CLOCK_MONOTONIC, &T0);
 
 	read_settings(); // ASM.ini
 
@@ -190,16 +188,17 @@ void RVExtension(char *output, int outputSize, const char *function)
 
 		case '1': // CPS update
 			if (ArmaServerInfo != NULL) {
-					struct timespec PCE;
+					struct timespec T1;
 					double tnsec;
 					unsigned conditionNo;
 
-					clock_gettime(CLOCK_MONOTONIC, &PCE);
-					tnsec = (double)((1000000000 * PCE.tv_sec + PCE.tv_nsec) - (1000000000 * PCS.tv_sec + PCS.tv_nsec))/(double)(1000000000 * PCF.tv_sec + PCF.tv_nsec);
+					memset(&T1, 0, sizeof(T1));
+					clock_gettime(CLOCK_MONOTONIC, &T1);
+					tnsec = (double)((1000000000 * T1.tv_sec + T1.tv_nsec) - (1000000000 * T0.tv_sec + T0.tv_nsec));
 					conditionNo = strtol(&function[2], &stopstring, 10);
 					ArmaServerInfo->FSM_CE_FREQ = floor(conditionNo * 1000 / tnsec + 0.5);
 
-					PCS = PCE;
+					T0 = T1;
 					asmlog_debug("1: CPS update");
 			}
 			break;

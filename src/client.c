@@ -45,7 +45,7 @@ extern FILE* log_file;
 
 int asmclient(int instance_set)
 {
-	int i, instance, count, server, rv, running = 1;
+	int instance, count, server, rv, running = 1;
 	char buf[BUFSIZE];
 	char* bp = NULL;
 	struct addrinfo hints;
