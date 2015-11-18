@@ -194,7 +194,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 
 					memset(&T1, 0, sizeof(T1));
 					clock_gettime(CLOCK_MONOTONIC, &T1);
-					tnsec = (double)((1000000000 * T1.tv_sec + T1.tv_nsec) - (1000000000 * T0.tv_sec + T0.tv_nsec));
+					tnsec = (1e9 * (T1.tv_sec - T0.tv_sec) + (T1.tv_nsec - T0.tv_nsec)) / 1e9;
 					conditionNo = strtol(&function[2], &stopstring, 10);
 					ArmaServerInfo->FSM_CE_FREQ = floor(conditionNo * 1000 / tnsec + 0.5);
 
