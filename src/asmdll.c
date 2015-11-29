@@ -153,7 +153,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 			}
 			// (Debug) Get instance id
 			if (strncasecmp(function, "id", sizeof("id")) == 0) {
-				snprintf(output, outputSize, "%zd", InstanceID);
+				snprintf(output, outputSize, "%u", InstanceID);
 				break;
 			}
 		} while (0);

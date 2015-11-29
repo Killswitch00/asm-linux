@@ -18,6 +18,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "asm.h"
+#include "asmlog.h"
 #include "client.h"
 #include "server.h"
 
@@ -75,7 +76,7 @@ void usage(const char* prog_name)
  */
 int main(int argc, char** argv)
 {
-	int option, flag, usage_error, status = EXIT_SUCCESS;
+	int option, usage_error, status = EXIT_SUCCESS;
 	int c_seen, b_seen, s_seen, y_seen;
 
 	c_seen = b_seen = s_seen = y_seen = 0;

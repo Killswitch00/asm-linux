@@ -43,6 +43,7 @@
 #include <sys/file.h>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -146,7 +147,7 @@ int already_running(pid_t pid, char *progname)
 	size_t cmdlen = 0;
 
 	memset(procpath, 0, sizeof(procpath));
-	snprintf(procpath, sizeof(procpath), "/proc/%zd/cmdline", pid);
+	snprintf(procpath, sizeof(procpath), "/proc/%d/cmdline", pid);
 
 	f = fopen(procpath, "r");
 	if (f == NULL) {
@@ -211,7 +212,7 @@ int PID_start()
 		pid_t pid, oldpid;
 
 		pid = getpid();
-		if (fscanf(pf, "%5zd", &oldpid) == 1) {
+		if (fscanf(pf, "%5d", &oldpid) == 1) {
 			/*  TODO: ok, so who is this PID then?
 			 *  If a process with that PID does not exist, carry on.
 			 *  If it's a running process that is not this daemon, carry on.
@@ -229,7 +230,7 @@ int PID_start()
 		flock(fd, LOCK_UN);
 		fclose(pf);
 		pid_name_created = 1;
-		asmlog_info("PID %zd written to %s", pid, pid_name);
+		asmlog_info("PID %d written to %s", pid, pid_name);
 	}
 	return 0;
 }
@@ -443,6 +444,8 @@ void daemonize()
 // Handle child processes exiting
 void handle_child(int s)
 {
+	(void)s;
+
     while (waitpid(-1, NULL, WNOHANG) > 0) {
 		connected_clients--;
 	}
@@ -549,10 +552,10 @@ int asmserver()
 {
 	int rv, server, yes = 1;
 	char portnum[PORT_STRLEN];
-	struct addrinfo hints = {0};
+	struct addrinfo hints;
 	struct addrinfo *address_list;
 	struct addrinfo *p;
-	struct sigaction sa = {0};
+	struct sigaction sa;
 
 	socklen_t size;
 	struct sockaddr_storage client_addr;
@@ -578,6 +581,7 @@ int asmserver()
 		asmlog_debug("asmserver(): daemonize done");
 	}
 
+	memset(&hints, 0, sizeof hints);
 	hints.ai_family   = AF_UNSPEC;   // IPv4 and IPv6
 	hints.ai_socktype = SOCK_STREAM; // TCP
 	hints.ai_flags    = AI_PASSIVE;  // fill in my IP for me
@@ -629,6 +633,7 @@ int asmserver()
 	}
 
 	// Handle client connection handlers exiting
+	memset(&sa, 0, sizeof sa);
 	sa.sa_handler = handle_child;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_NOCLDSTOP;
@@ -725,7 +730,7 @@ int asmserver()
 
 			close(client);
 			asmlog_info("Client %d disconnected", connected_clients);
-			closelog();
+			asmlog_close();
 			_exit(0);
 		} else {
 			/* PARENT */

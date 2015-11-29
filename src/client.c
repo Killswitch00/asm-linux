@@ -161,7 +161,7 @@ int asmclient(int instance_set)
 
 			// instance|TimeStamp|FPS|CPS|PL#|AIL|AIR|OC0|OC1|OC2
 			if (log_file) {
-				fprintf(log_file, "%d|%zd|%zd|%zd|%zd|%zd|%zd|%zd|%zd|%zd\n",
+				fprintf(log_file, "%d|%zd|%u|%u|%u|%u|%u|%u|%u|%u\n",
 					instance, time(NULL),
 					asi->SERVER_FPS, asi->FSM_CE_FREQ,
 					asi->PLAYER_COUNT, asi->AI_LOC_COUNT, asi->AI_REM_COUNT,

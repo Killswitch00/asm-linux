@@ -100,12 +100,12 @@ void asmlog_syslog(const char* name)
 }
 
 // Allow LOG_DEBUG level messages to be shown
-void asmlog_enable_debug()
+void asmlog_enable_debug(void)
 {
 	asmlog_level = LOG_DEBUG;
 }
 
-void asmlog_close()
+void asmlog_close(void)
 {
 	if (logdest == ASM_LOGDEST_SYSLOG)
 	{

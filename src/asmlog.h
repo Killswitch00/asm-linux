@@ -22,17 +22,19 @@
 
 extern int asmlog_level;
 
+void asmlog_console();
 void asmlog_stdout(const char* name);
+void asmlog_systemd(const char* name);
 void asmlog_syslog(const char* name);
 
-void asmlog_enable_debug();
+void asmlog_enable_debug(void);
+void asmlog_close(void);
 
-#define ASMLOG(x) void asmlog_x (const char* format, ...)
-ASMLOG(critical);
-ASMLOG(error);
-ASMLOG(warning);
-ASMLOG(notice);
-ASMLOG(info);
-ASMLOG(debug);
+void asmlog_critical(const char* format, ...);
+void asmlog_error(const char* format, ...);
+void asmlog_warning(const char* format, ...);
+void asmlog_notice(const char* format, ...);
+void asmlog_info(const char* format, ...);
+void asmlog_debug(const char* format, ...);
 
 #endif /* ASMLOG_H_ */
