@@ -1,6 +1,6 @@
 EXTRA_DIST = Makefile.old
 
-AM_CFLAGS = $(GLIB_CFLAGS)
+AM_CFLAGS = -Wall -Werror -Wextra $(GLIB_CFLAGS)
 
 bin_PROGRAMS = asm
 check_PROGRAMS = test

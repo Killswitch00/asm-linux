@@ -332,7 +332,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = Makefile.old
-AM_CFLAGS = $(GLIB_CFLAGS)
+AM_CFLAGS = -Wall -Werror -Wextra $(GLIB_CFLAGS)
 pkglib_LTLIBRARIES = asmdll.la
 
 # TODO: run the test program during "make check"
