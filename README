@@ -192,12 +192,9 @@ Usage
    The asm service will listen for TCP connections on port 24000 by default,
    so make sure to allow that in your firewall.
 
-2) Launch the Arma 3 server with @asm as a mod. For example:
+2) Launch the Arma 3 server with @asm as a server-side mod. For example:
 
-        ./arma3server <your preferred launch parameters here> -mod=@asm
-
-   Alternatively, you can put the asm.pbo addon into the Arma 3 addons folder,
-   in which case you can start the Arma 3 server without -mod=@asm.
+        ./arma3server <your preferred launch parameters here> -servermod=@asm
 
 3) In Windows, run the ArmaServerMonitor.exe client applicaiton and connect to
    the Linux dedi server just like you would connect to a Windows server:
