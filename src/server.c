@@ -312,7 +312,7 @@ void PID_stop()
  */
 void daemonize()
 {
-	int i, fd, status = -1;
+	int i, fd, status;
 	int pf1[2]; // Connects parent with child 1
 
 	struct dirent** dirlist;
@@ -345,12 +345,15 @@ void daemonize()
 	// 4 TODO: santitize the environment block
 
 	// 5 Call fork()
-	pipe(pf1);
+	if (pipe(pf1) != 0) {
+		asmlog_error("daemonize: 5, pipe");
+		exit(errno);
+	}
 
 	if ((pid = fork()) < 0) {
 		close(pf1[0]);
 		close(pf1[1]);
-		asmlog_error("daemonize: fork");
+		asmlog_error("daemonize: 5, fork");
 		exit(errno);
 	};
 
@@ -364,29 +367,40 @@ void daemonize()
 		// 6 Child process Mk.I - call setsid()
 		if (setsid() < 0) {
 			close(pf1[1]);
-			asmlog_error("daemonize: setsid");
+			asmlog_error("daemonize: 6, setsid");
 			_exit(errno);
 		}
 
-		pipe(pf2); // Connects child 1 with child 2 (the actual daemon)
+		if (pipe(pf2) != 0) { // Connects child 1 with child 2 (the actual daemon)
+			asmlog_error("daemonize: 6, pipe");
+			_exit(errno);
+		}
 
 		// 7 Fork again
 		if ((pid = fork()) < 0) {
 			close(pf1[1]);
 			close(pf2[0]);
 			close(pf2[1]);
-			asmlog_error("daemonize: fork 2");
+			asmlog_error("daemonize: 7, fork");
 			_exit(errno);
 		}
 
 		// 8 Call exit() in the first child
 		if (pid > 0) {
+			status = 0;
 			close(pf2[1]);
-			read(pf2[0], &daemon_pid, sizeof(pid_t));
-			i = write(pf1[1], &daemon_pid, sizeof(pid_t));
+			if (read(pf2[0], &daemon_pid, sizeof(pid_t)) < 0) {
+				asmlog_error("daemonize: 8, read");
+				status = errno;
+			} else {
+				if (write(pf1[1], &daemon_pid, sizeof(pid_t)) < 0) {
+					asmlog_error("daemonize: 8, write");
+					status = errno;
+				}
+			}
 			close(pf2[0]);
 			close(pf1[1]);
-			_exit(0);
+			_exit(status);
 		}
 
 		close(pf1[1]);
@@ -425,7 +439,10 @@ void daemonize()
 
 		// 14 Notify the original process that we're done
 		pid = getpid();
-		write(pf2[1], &pid, sizeof(pid_t));
+		if (write(pf2[1], &pid, sizeof(pid_t)) < 0) {
+			asmlog_error("daemonize: 14, write");
+			_exit(errno);
+		}
 		//asmlog_info("daemonize, child 2 init DONE: %d bytes written", i);
 		close(pf2[1]);
 	} else {
@@ -689,7 +706,8 @@ int asmserver()
 		if (pid == 0) {
 			/* CHILD */
 			int i;
-			char req[4] = {0};
+			char req[5] = {0};
+
 			fd_set fds;
 
 			close(server); // child doesn't need the server socket
@@ -718,12 +736,13 @@ int asmserver()
 				if (rv == -1 && errno == EINTR) continue;
 
 				// A zero "DWORD" (32-bits) is the magic word
-				if (*((uint32_t *)req) == 0) {
+				i = atoi(req);
+				if (i == 0) {
 					asmlog_debug("Client %d send_asi() ...", connected_clients);
 					send_asi(client);
 				} else {
 					asmlog_error("Client %d received %08x (%02x %02x %02x %02x)",
-							connected_clients, *((uint32_t *)req), req[0], req[1], req[2], req[3]);
+							connected_clients, i, req[0], req[1], req[2], req[3]);
 				}
 			 	memset(req, 0xff, sizeof(req));
 			 }
