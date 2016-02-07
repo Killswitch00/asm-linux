@@ -39,13 +39,17 @@
 
 extern char* host;
 extern int port;
+extern int running;
+extern int once;
 
 extern int log_interval;
 extern FILE* log_file;
 
+const int update_interval = 1;
+
 int asmclient(int instance_set)
 {
-	int instance, count, server, rv, running = 1;
+	int instance, count, server, rv;
 	char buf[BUFSIZE];
 	char* bp = NULL;
 	struct addrinfo hints;
@@ -97,6 +101,7 @@ int asmclient(int instance_set)
 
 	freeaddrinfo(serverinfo);
 
+	running = 1;
 	while (running) {
 		// Send four-byte zero reqest
 		int remaining = (int)sizeof(request);
@@ -177,10 +182,14 @@ int asmclient(int instance_set)
 					asi->OBJ_COUNT_0, asi->OBJ_COUNT_1, asi->OBJ_COUNT_2);
 			}
 		}
-		// Debug: run only one time
-		running = 0;
 
-		(void)sleep(log_interval);
+		if (once != 0) {
+			// Run only one time
+			running = 0;
+		} else {
+			// Or keep displaying statistics
+			(void)sleep(update_interval);
+		}
 	}
 
 	return EXIT_SUCCESS;

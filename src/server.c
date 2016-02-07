@@ -60,9 +60,9 @@ extern int    pid_name_len;
 extern int    port;
 extern int    max_clients;
 extern int    sysv_daemon;
+extern int    running;
 
 static int    pid_name_created = 0;
-static int    running = 0;
 static int    connected_clients = 0;
 
 static int    filemap_fd;
@@ -468,32 +468,6 @@ void handle_child(int s)
 	}
 }
 
-// Handle a few other signals we may receive
-void handle_signal(int s)
-{
-	if (running == 0) return;
-
-	switch (s)
-	{
-		case SIGHUP:
-			/* TODO: re-read config.
-			 * Could be used to re-initalize the service if the need arises.
-			 */
-			asmlog_debug("PID %d: got SIGHUP", getpid());
-			break;
-		case SIGINT:
-			asmlog_debug("PID %d: got SIGINT", getpid());
-			running = 0;
-			break;
-		case SIGTERM:
-			asmlog_debug("PID %d: got SIGTERM", getpid());
-			running = 0;
-			break;
-		default:
-			asmlog_info("PID %d, got signal %d", getpid(), s);
-			break;
-	}
-}
 
 /*
  * serialize the server info and send it down the tubes
@@ -659,13 +633,6 @@ int asmserver()
 		close(server);
 	    return EXIT_FAILURE;
 	}
-
-	// Handle various stop signals
-	sa.sa_handler = handle_signal;
-	sa.sa_flags = 0;
-	sigaction(SIGHUP, &sa, NULL);
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
 
 	// Wait for connections
 	running = 1;

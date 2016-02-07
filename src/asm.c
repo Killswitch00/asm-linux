@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <libgen.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,9 +54,39 @@ int    instance_set = 0; // 0...3, which set of 4 instances should be reported b
 char*  host;
 int    port = 24000;
 
+int    running = 0;
+int    once = 1;  // Client: display stats once, not continously. TODO: add option
+
 void usage(const char* prog_name)
 {
 	fprintf(stderr, "\nUsage: %s [-s|-c] [-n <max #clients>] [-h host] [-p port] [-l logfile] [-t <log interval>]\n", prog_name);
+}
+
+// Handle a few termination signals
+void handle_signal(int s)
+{
+	if (running == 0) return;
+
+	switch (s)
+	{
+		case SIGHUP:
+			/* TODO: re-read config.
+			 * Could be used to re-initalize the service if the need arises.
+			 */
+			asmlog_debug("PID %d: got SIGHUP", getpid());
+			break;
+		case SIGINT:
+			asmlog_debug("PID %d: got SIGINT", getpid());
+			running = 0;
+			break;
+		case SIGTERM:
+			asmlog_debug("PID %d: got SIGTERM", getpid());
+			running = 0;
+			break;
+		default:
+			asmlog_info("PID %d, got signal %d", getpid(), s);
+			break;
+	}
 }
 
 /*
@@ -78,6 +109,7 @@ int main(int argc, char** argv)
 {
 	int option, usage_error, status = EXIT_SUCCESS;
 	int c_seen, b_seen, s_seen, y_seen;
+	struct sigaction sa;
 
 	c_seen = b_seen = s_seen = y_seen = 0;
 	usage_error = 0;
@@ -218,6 +250,15 @@ int main(int argc, char** argv)
 	printf("log file:    %s\n", log_name);
 	printf("interval:    %d\n", log_interval);
 #endif
+
+	// Handle HUP, kill and CTRL-C
+	memset(&sa, 0, sizeof sa);
+	sa.sa_handler = handle_signal;
+	sa.sa_flags = 0;
+	sigaction(SIGHUP, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
+
 	if (server) {
 		if (sysv_daemon) {
 			asmlog_syslog(prog_name);
