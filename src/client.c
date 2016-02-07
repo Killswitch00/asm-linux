@@ -41,11 +41,14 @@ extern char* host;
 extern int port;
 extern int running;
 extern int once;
-
 extern int log_interval;
-extern FILE* log_file;
+extern char* log_prefix;
 
 const int update_interval = 1;
+
+FILE* log_file;
+char *log_filename;
+
 
 int asmclient(int instance_set)
 {
@@ -100,6 +103,17 @@ int asmclient(int instance_set)
 	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof(s));
 
 	freeaddrinfo(serverinfo);
+
+	if (log_interval > 0) {
+		size_t log_filename_len = strlen(log_prefix) + strlen(".log") + 1;
+		log_filename = calloc(log_filename_len, 1);
+		snprintf(log_filename, log_filename_len, "%s.log", log_prefix);
+		log_file = fopen(log_filename, "a+");
+		if (log_file == NULL) {
+			perror("Could not open log file");
+			return EXIT_FAILURE;
+		}
+	}
 
 	running = 1;
 	while (running) {
@@ -192,6 +206,12 @@ int asmclient(int instance_set)
 		}
 	}
 
+	if (log_file) {
+		(void)fclose(log_file);
+	}
+	if (log_filename) {
+		free(log_filename);
+	}
 	return EXIT_SUCCESS;
 }
 

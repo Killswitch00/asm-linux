@@ -36,10 +36,10 @@ char*  prog_name;
 char** args;
 int    argsc;
 
-char*  log_name;
-size_t log_name_len;
+size_t log_prefix_len;
+char*  log_prefix;
+char*  log_prefix_default = "ASMlog";
 int    log_interval;
-FILE*  log_file;
 
 char*  pid_name;
 size_t pid_name_len;
@@ -122,12 +122,7 @@ int main(int argc, char** argv)
 	args  = argv;
 	argsc = argc;
 
-	log_name_len = pid_name_len = (size_t)sysconf(_PC_PATH_MAX);
-	if ((log_name = (char *)calloc(log_name_len, 1)) == NULL) {
-		perror("calloc");
-		status = EXIT_FAILURE;
-		goto cleanup;
-	}
+	pid_name_len = (size_t)sysconf(_PC_PATH_MAX);
 	if ((pid_name = (char *)calloc(pid_name_len, 1)) == NULL) {
 		perror("calloc");
 		status = EXIT_FAILURE;
@@ -164,11 +159,13 @@ int main(int argc, char** argv)
 				pid_name[pid_name_len - 1] = '\0';
 				break;
 			case 'l':
-				if (log_interval == 0) log_interval = 1;
 				if (optarg != NULL) {
-					strncpy(log_name, optarg, log_name_len);
+					if (log_interval == 0) log_interval = 1;
+					log_prefix_len = strlen(optarg) + 1;
+					log_prefix = calloc(log_prefix_len, 1);
+					strncpy(log_prefix, optarg, log_prefix_len);
+					log_prefix[log_prefix_len - 1] = '\0';
 				}
-				log_name[log_name_len - 1] = '\0';
 				break;
 			case 'n':
 				if (isdigit(*optarg)) {
@@ -237,8 +234,8 @@ int main(int argc, char** argv)
 			strcpy(host, "localhost");
 		}
 
-		if (*log_name == '\0') {
-			strcpy(log_name, "./asm.log");
+		if (log_prefix == NULL || *log_prefix == '\0') {
+			log_prefix = log_prefix_default;
 		}
 	}
 #ifdef SHOW_OPTIONS
@@ -247,7 +244,7 @@ int main(int argc, char** argv)
 	printf("max clients: %d\n", max_clients);
 	printf("host:        %s\n", host);
 	printf("port:        %d\n", port);
-	printf("log file:    %s\n", log_name);
+	printf("log prefix:  %s\n", log_prefix);
 	printf("interval:    %d\n", log_interval);
 #endif
 
@@ -270,14 +267,6 @@ int main(int argc, char** argv)
 		// Work as a service
 		status = asmserver();
 	} else {
-		if (log_interval > 0) {
-			log_file = fopen(log_name, "a+");
-			if (log_file == NULL) {
-				perror("Could not open log file");
-				status = EXIT_FAILURE;
-				goto cleanup;
-			}
-		}
 		asmlog_console();
 
 		// Client: connect to server and receive stats
@@ -285,11 +274,10 @@ int main(int argc, char** argv)
 	}
 
 cleanup:
-	if (log_file)  fclose(log_file);
 	if (host)      free(host);
 	if (pid_name)  free(pid_name);
-	if (log_name)  free(log_name);
 	if (prog_name) free(prog_name);
+	if (log_prefix && log_prefix != log_prefix_default) free(log_prefix);
 
 	return status;
 }
