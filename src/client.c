@@ -159,11 +159,20 @@ int asmclient(int instance_set)
 			asmlog_info("MISSION = \"%s\"", asi->MISSION);
 			asmlog_info("PROFILE = \"%s\"", asi->PROFILE);
 
-			// instance|TimeStamp|FPS|CPS|PL#|AIL|AIR|OC0|OC1|OC2
+			// TimeStamp|FPS|CPS|PL#|AIL|AIR|OC0|OC1|OC2
+			// FIXME: separate log files for each instance
 			if (log_file) {
-				fprintf(log_file, "%d|%zd|%u|%u|%u|%u|%u|%u|%u|%u\n",
-					instance, time(NULL),
-					asi->SERVER_FPS, asi->FSM_CE_FREQ,
+				time_t now;
+				struct tm *ts;
+				char timestamp[21];
+
+				memset(timestamp, 0, sizeof(timestamp));
+				now = time(NULL);
+				ts = localtime(&now);
+				strftime(timestamp, sizeof(timestamp), "%T", ts);
+
+				fprintf(log_file, "%s|%u|%u|%u|%u|%u|%u|%u|%u\n",
+					timestamp, asi->SERVER_FPS, asi->FSM_CE_FREQ,
 					asi->PLAYER_COUNT, asi->AI_LOC_COUNT, asi->AI_REM_COUNT,
 					asi->OBJ_COUNT_0, asi->OBJ_COUNT_1, asi->OBJ_COUNT_2);
 			}
