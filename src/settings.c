@@ -61,6 +61,9 @@ int read_settings(void)
 	memset(inipath, 0, PATH_MAX);
 
 	home = getenv("HOME");
+	if (strcmp(home, "/") == 0) {
+		home = NULL;
+	}
 
 	settings = g_key_file_new();
 	if (settings == NULL)
