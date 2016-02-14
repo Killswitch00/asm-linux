@@ -1,1 +1,27 @@
-0.1	First release
+0.5
+Binary renamed from "asm" to "armaservermonitor".
+Improvements in error and signal handling.
+Fixed issue with finding asm.ini in /etc
+
+0.4
+Corrected CPS calculation. (This fixes the erratic CPS graph shown in
+ArmaServerMonitor.exe)
+Debug logging is now disabled by default. They can be enabled for the
+extension by setting the environment variable ASM_DEBUG to 1 before
+launching the Arma server:
+
+    export ASM_DEBUG=1
+
+Debug printouts for the asm server application can be enabled by using
+the -d start option:
+
+    ./asm -d
+
+0.3
+Show asmdll initialization in the Arma server log output.
+
+0.2
+Fixed: hung server-side instance would make the client receive garbage data.
+
+0.1
+First release

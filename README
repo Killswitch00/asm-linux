@@ -44,7 +44,8 @@ ASM for Linux
 ASM for Linux consists of
 
 * A shared library, "asmdll.so", for the ArmA 3 server.
-* An application, "asm" that can either be run as a service or a query client.
+* An application, "armaservermonitor" that can either be run as a service
+  or a query client.
 
 The ASM service will monitor up to 16 Arma servers and let clients query
 the server to get the performance values. Note that there is no GUI
@@ -145,7 +146,7 @@ Building
 
    Now, the files that have been built will be installed here:
 
-        /home/username/bin/asm
+        /home/username/bin/armaservermonitor
         /home/username/etc/asm.ini
         /home/username/lib/armaservermonitor/asmdll.so
 
@@ -187,7 +188,7 @@ Usage
 
 1) Change into the Arma 3 server directory and start the ASM service:
 
-        ./asm -s &>asm.txt &
+        ./armaservermonitor -s &>asm.txt &
 
    The asm service will listen for TCP connections on port 24000 by default,
    so make sure to allow that in your firewall.

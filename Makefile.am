@@ -10,7 +10,7 @@ dist-bin: all
 	@$(MAKE) install-strip DESTDIR=/dev/shm/asm-root
 	@mkdir -p /dev/shm/$(distdir)-bin
 	@install -m 644 /dev/shm/asm-root/$(sysconfdir)/asm.ini /dev/shm/$(distdir)-bin/
-	@install -m 755 /dev/shm/asm-root/$(bindir)/asm /dev/shm/$(distdir)-bin/
+	@install -m 755 /dev/shm/asm-root/$(bindir)/armaservermonitor /dev/shm/$(distdir)-bin/
 	@install -m 755 /dev/shm/asm-root/$(libdir)/$(PACKAGE)/asmdll.so /dev/shm/$(distdir)-bin/
 	fakeroot tar -C /dev/shm -cvzf $(distdir)-bin.tgz $(distdir)-bin
 	@rm -rf /dev/shm/$(distdir)-bin

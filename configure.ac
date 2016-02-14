@@ -1,4 +1,4 @@
-AC_INIT([Arma Server Monitor], [0.4],[killswitch@zeus-community.net],
+AC_INIT([Arma Server Monitor], [0.5],[killswitch@zeus-community.net],
 	[armaservermonitor], [https://github.com/Killswitch00/asm-linux])
 AC_PREREQ([2.59])
 

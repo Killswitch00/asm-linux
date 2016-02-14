@@ -79,7 +79,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = asm$(EXEEXT)
+bin_PROGRAMS = armaservermonitor$(EXEEXT)
 check_PROGRAMS = test$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -136,14 +136,19 @@ asmdll_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(asmdll_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
-am_asm_OBJECTS = asm-asm.$(OBJEXT) asm-asmlog.$(OBJEXT) \
-	asm-client.$(OBJEXT) asm-gettickcount.$(OBJEXT) \
-	asm-server.$(OBJEXT) asm-settings.$(OBJEXT) asm-util.$(OBJEXT)
-asm_OBJECTS = $(am_asm_OBJECTS)
-asm_LDADD = $(LDADD)
-asm_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(asm_CFLAGS) $(CFLAGS) \
-	$(asm_LDFLAGS) $(LDFLAGS) -o $@
+am_armaservermonitor_OBJECTS = armaservermonitor-asm.$(OBJEXT) \
+	armaservermonitor-asmlog.$(OBJEXT) \
+	armaservermonitor-client.$(OBJEXT) \
+	armaservermonitor-gettickcount.$(OBJEXT) \
+	armaservermonitor-server.$(OBJEXT) \
+	armaservermonitor-settings.$(OBJEXT) \
+	armaservermonitor-util.$(OBJEXT)
+armaservermonitor_OBJECTS = $(am_armaservermonitor_OBJECTS)
+armaservermonitor_LDADD = $(LDADD)
+armaservermonitor_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(armaservermonitor_CFLAGS) $(CFLAGS) \
+	$(armaservermonitor_LDFLAGS) $(LDFLAGS) -o $@
 am_test_OBJECTS = test.$(OBJEXT)
 test_OBJECTS = $(am_test_OBJECTS)
 test_LDADD = $(LDADD)
@@ -184,8 +189,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(asmdll_la_SOURCES) $(asm_SOURCES) $(test_SOURCES)
-DIST_SOURCES = $(asmdll_la_SOURCES) $(asm_SOURCES) $(test_SOURCES)
+SOURCES = $(asmdll_la_SOURCES) $(armaservermonitor_SOURCES) \
+	$(test_SOURCES)
+DIST_SOURCES = $(asmdll_la_SOURCES) $(armaservermonitor_SOURCES) \
+	$(test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -337,12 +344,12 @@ pkglib_LTLIBRARIES = asmdll.la
 
 # TODO: run the test program during "make check"
 #TESTS = ...
-asm_SOURCES = asm.h asm.c asmlog.h asmlog.c client.h client.c \
+armaservermonitor_SOURCES = asm.h asm.c asmlog.h asmlog.c client.h client.c \
  gettickcount.h gettickcount.c server.h server.c \
  settings.h settings.c util.h util.c
 
-asm_CFLAGS = $(AM_CFLAGS)
-asm_LDFLAGS = -lrt -lm $(GLIB_LIBS)
+armaservermonitor_CFLAGS = $(AM_CFLAGS)
+armaservermonitor_LDFLAGS = -lrt -lm $(GLIB_LIBS)
 asmdll_la_SOURCES = asmdll.h asmdll.c asmlog.h asmlog.c \
  gettickcount.h gettickcount.c settings.h settings.c util.h util.c
 
@@ -496,9 +503,9 @@ clean-checkPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-asm$(EXEEXT): $(asm_OBJECTS) $(asm_DEPENDENCIES) $(EXTRA_asm_DEPENDENCIES) 
-	@rm -f asm$(EXEEXT)
-	$(AM_V_CCLD)$(asm_LINK) $(asm_OBJECTS) $(asm_LDADD) $(LIBS)
+armaservermonitor$(EXEEXT): $(armaservermonitor_OBJECTS) $(armaservermonitor_DEPENDENCIES) $(EXTRA_armaservermonitor_DEPENDENCIES) 
+	@rm -f armaservermonitor$(EXEEXT)
+	$(AM_V_CCLD)$(armaservermonitor_LINK) $(armaservermonitor_OBJECTS) $(armaservermonitor_LDADD) $(LIBS)
 
 test$(EXEEXT): $(test_OBJECTS) $(test_DEPENDENCIES) $(EXTRA_test_DEPENDENCIES) 
 	@rm -f test$(EXEEXT)
@@ -510,13 +517,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-asm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-asmlog.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-gettickcount.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-server.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-settings.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/armaservermonitor-asm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/armaservermonitor-asmlog.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/armaservermonitor-client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/armaservermonitor-gettickcount.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/armaservermonitor-server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/armaservermonitor-settings.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/armaservermonitor-util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asmdll.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asmlog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gettickcount.Plo@am__quote@
@@ -545,103 +552,103 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
-asm-asm.o: asm.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-asm.o -MD -MP -MF $(DEPDIR)/asm-asm.Tpo -c -o asm-asm.o `test -f 'asm.c' || echo '$(srcdir)/'`asm.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-asm.Tpo $(DEPDIR)/asm-asm.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asm.c' object='asm-asm.o' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-asm.o: asm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-asm.o -MD -MP -MF $(DEPDIR)/armaservermonitor-asm.Tpo -c -o armaservermonitor-asm.o `test -f 'asm.c' || echo '$(srcdir)/'`asm.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-asm.Tpo $(DEPDIR)/armaservermonitor-asm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asm.c' object='armaservermonitor-asm.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-asm.o `test -f 'asm.c' || echo '$(srcdir)/'`asm.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-asm.o `test -f 'asm.c' || echo '$(srcdir)/'`asm.c
 
-asm-asm.obj: asm.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-asm.obj -MD -MP -MF $(DEPDIR)/asm-asm.Tpo -c -o asm-asm.obj `if test -f 'asm.c'; then $(CYGPATH_W) 'asm.c'; else $(CYGPATH_W) '$(srcdir)/asm.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-asm.Tpo $(DEPDIR)/asm-asm.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asm.c' object='asm-asm.obj' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-asm.obj: asm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-asm.obj -MD -MP -MF $(DEPDIR)/armaservermonitor-asm.Tpo -c -o armaservermonitor-asm.obj `if test -f 'asm.c'; then $(CYGPATH_W) 'asm.c'; else $(CYGPATH_W) '$(srcdir)/asm.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-asm.Tpo $(DEPDIR)/armaservermonitor-asm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asm.c' object='armaservermonitor-asm.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-asm.obj `if test -f 'asm.c'; then $(CYGPATH_W) 'asm.c'; else $(CYGPATH_W) '$(srcdir)/asm.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-asm.obj `if test -f 'asm.c'; then $(CYGPATH_W) 'asm.c'; else $(CYGPATH_W) '$(srcdir)/asm.c'; fi`
 
-asm-asmlog.o: asmlog.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-asmlog.o -MD -MP -MF $(DEPDIR)/asm-asmlog.Tpo -c -o asm-asmlog.o `test -f 'asmlog.c' || echo '$(srcdir)/'`asmlog.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-asmlog.Tpo $(DEPDIR)/asm-asmlog.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asmlog.c' object='asm-asmlog.o' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-asmlog.o: asmlog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-asmlog.o -MD -MP -MF $(DEPDIR)/armaservermonitor-asmlog.Tpo -c -o armaservermonitor-asmlog.o `test -f 'asmlog.c' || echo '$(srcdir)/'`asmlog.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-asmlog.Tpo $(DEPDIR)/armaservermonitor-asmlog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asmlog.c' object='armaservermonitor-asmlog.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-asmlog.o `test -f 'asmlog.c' || echo '$(srcdir)/'`asmlog.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-asmlog.o `test -f 'asmlog.c' || echo '$(srcdir)/'`asmlog.c
 
-asm-asmlog.obj: asmlog.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-asmlog.obj -MD -MP -MF $(DEPDIR)/asm-asmlog.Tpo -c -o asm-asmlog.obj `if test -f 'asmlog.c'; then $(CYGPATH_W) 'asmlog.c'; else $(CYGPATH_W) '$(srcdir)/asmlog.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-asmlog.Tpo $(DEPDIR)/asm-asmlog.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asmlog.c' object='asm-asmlog.obj' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-asmlog.obj: asmlog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-asmlog.obj -MD -MP -MF $(DEPDIR)/armaservermonitor-asmlog.Tpo -c -o armaservermonitor-asmlog.obj `if test -f 'asmlog.c'; then $(CYGPATH_W) 'asmlog.c'; else $(CYGPATH_W) '$(srcdir)/asmlog.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-asmlog.Tpo $(DEPDIR)/armaservermonitor-asmlog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='asmlog.c' object='armaservermonitor-asmlog.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-asmlog.obj `if test -f 'asmlog.c'; then $(CYGPATH_W) 'asmlog.c'; else $(CYGPATH_W) '$(srcdir)/asmlog.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-asmlog.obj `if test -f 'asmlog.c'; then $(CYGPATH_W) 'asmlog.c'; else $(CYGPATH_W) '$(srcdir)/asmlog.c'; fi`
 
-asm-client.o: client.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-client.o -MD -MP -MF $(DEPDIR)/asm-client.Tpo -c -o asm-client.o `test -f 'client.c' || echo '$(srcdir)/'`client.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-client.Tpo $(DEPDIR)/asm-client.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='client.c' object='asm-client.o' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-client.o: client.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-client.o -MD -MP -MF $(DEPDIR)/armaservermonitor-client.Tpo -c -o armaservermonitor-client.o `test -f 'client.c' || echo '$(srcdir)/'`client.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-client.Tpo $(DEPDIR)/armaservermonitor-client.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='client.c' object='armaservermonitor-client.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-client.o `test -f 'client.c' || echo '$(srcdir)/'`client.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-client.o `test -f 'client.c' || echo '$(srcdir)/'`client.c
 
-asm-client.obj: client.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-client.obj -MD -MP -MF $(DEPDIR)/asm-client.Tpo -c -o asm-client.obj `if test -f 'client.c'; then $(CYGPATH_W) 'client.c'; else $(CYGPATH_W) '$(srcdir)/client.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-client.Tpo $(DEPDIR)/asm-client.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='client.c' object='asm-client.obj' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-client.obj: client.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-client.obj -MD -MP -MF $(DEPDIR)/armaservermonitor-client.Tpo -c -o armaservermonitor-client.obj `if test -f 'client.c'; then $(CYGPATH_W) 'client.c'; else $(CYGPATH_W) '$(srcdir)/client.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-client.Tpo $(DEPDIR)/armaservermonitor-client.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='client.c' object='armaservermonitor-client.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-client.obj `if test -f 'client.c'; then $(CYGPATH_W) 'client.c'; else $(CYGPATH_W) '$(srcdir)/client.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-client.obj `if test -f 'client.c'; then $(CYGPATH_W) 'client.c'; else $(CYGPATH_W) '$(srcdir)/client.c'; fi`
 
-asm-gettickcount.o: gettickcount.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-gettickcount.o -MD -MP -MF $(DEPDIR)/asm-gettickcount.Tpo -c -o asm-gettickcount.o `test -f 'gettickcount.c' || echo '$(srcdir)/'`gettickcount.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-gettickcount.Tpo $(DEPDIR)/asm-gettickcount.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gettickcount.c' object='asm-gettickcount.o' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-gettickcount.o: gettickcount.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-gettickcount.o -MD -MP -MF $(DEPDIR)/armaservermonitor-gettickcount.Tpo -c -o armaservermonitor-gettickcount.o `test -f 'gettickcount.c' || echo '$(srcdir)/'`gettickcount.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-gettickcount.Tpo $(DEPDIR)/armaservermonitor-gettickcount.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gettickcount.c' object='armaservermonitor-gettickcount.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-gettickcount.o `test -f 'gettickcount.c' || echo '$(srcdir)/'`gettickcount.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-gettickcount.o `test -f 'gettickcount.c' || echo '$(srcdir)/'`gettickcount.c
 
-asm-gettickcount.obj: gettickcount.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-gettickcount.obj -MD -MP -MF $(DEPDIR)/asm-gettickcount.Tpo -c -o asm-gettickcount.obj `if test -f 'gettickcount.c'; then $(CYGPATH_W) 'gettickcount.c'; else $(CYGPATH_W) '$(srcdir)/gettickcount.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-gettickcount.Tpo $(DEPDIR)/asm-gettickcount.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gettickcount.c' object='asm-gettickcount.obj' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-gettickcount.obj: gettickcount.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-gettickcount.obj -MD -MP -MF $(DEPDIR)/armaservermonitor-gettickcount.Tpo -c -o armaservermonitor-gettickcount.obj `if test -f 'gettickcount.c'; then $(CYGPATH_W) 'gettickcount.c'; else $(CYGPATH_W) '$(srcdir)/gettickcount.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-gettickcount.Tpo $(DEPDIR)/armaservermonitor-gettickcount.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gettickcount.c' object='armaservermonitor-gettickcount.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-gettickcount.obj `if test -f 'gettickcount.c'; then $(CYGPATH_W) 'gettickcount.c'; else $(CYGPATH_W) '$(srcdir)/gettickcount.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-gettickcount.obj `if test -f 'gettickcount.c'; then $(CYGPATH_W) 'gettickcount.c'; else $(CYGPATH_W) '$(srcdir)/gettickcount.c'; fi`
 
-asm-server.o: server.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-server.o -MD -MP -MF $(DEPDIR)/asm-server.Tpo -c -o asm-server.o `test -f 'server.c' || echo '$(srcdir)/'`server.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-server.Tpo $(DEPDIR)/asm-server.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='server.c' object='asm-server.o' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-server.o: server.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-server.o -MD -MP -MF $(DEPDIR)/armaservermonitor-server.Tpo -c -o armaservermonitor-server.o `test -f 'server.c' || echo '$(srcdir)/'`server.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-server.Tpo $(DEPDIR)/armaservermonitor-server.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='server.c' object='armaservermonitor-server.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-server.o `test -f 'server.c' || echo '$(srcdir)/'`server.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-server.o `test -f 'server.c' || echo '$(srcdir)/'`server.c
 
-asm-server.obj: server.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-server.obj -MD -MP -MF $(DEPDIR)/asm-server.Tpo -c -o asm-server.obj `if test -f 'server.c'; then $(CYGPATH_W) 'server.c'; else $(CYGPATH_W) '$(srcdir)/server.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-server.Tpo $(DEPDIR)/asm-server.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='server.c' object='asm-server.obj' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-server.obj: server.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-server.obj -MD -MP -MF $(DEPDIR)/armaservermonitor-server.Tpo -c -o armaservermonitor-server.obj `if test -f 'server.c'; then $(CYGPATH_W) 'server.c'; else $(CYGPATH_W) '$(srcdir)/server.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-server.Tpo $(DEPDIR)/armaservermonitor-server.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='server.c' object='armaservermonitor-server.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-server.obj `if test -f 'server.c'; then $(CYGPATH_W) 'server.c'; else $(CYGPATH_W) '$(srcdir)/server.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-server.obj `if test -f 'server.c'; then $(CYGPATH_W) 'server.c'; else $(CYGPATH_W) '$(srcdir)/server.c'; fi`
 
-asm-settings.o: settings.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-settings.o -MD -MP -MF $(DEPDIR)/asm-settings.Tpo -c -o asm-settings.o `test -f 'settings.c' || echo '$(srcdir)/'`settings.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-settings.Tpo $(DEPDIR)/asm-settings.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='settings.c' object='asm-settings.o' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-settings.o: settings.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-settings.o -MD -MP -MF $(DEPDIR)/armaservermonitor-settings.Tpo -c -o armaservermonitor-settings.o `test -f 'settings.c' || echo '$(srcdir)/'`settings.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-settings.Tpo $(DEPDIR)/armaservermonitor-settings.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='settings.c' object='armaservermonitor-settings.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-settings.o `test -f 'settings.c' || echo '$(srcdir)/'`settings.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-settings.o `test -f 'settings.c' || echo '$(srcdir)/'`settings.c
 
-asm-settings.obj: settings.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-settings.obj -MD -MP -MF $(DEPDIR)/asm-settings.Tpo -c -o asm-settings.obj `if test -f 'settings.c'; then $(CYGPATH_W) 'settings.c'; else $(CYGPATH_W) '$(srcdir)/settings.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-settings.Tpo $(DEPDIR)/asm-settings.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='settings.c' object='asm-settings.obj' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-settings.obj: settings.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-settings.obj -MD -MP -MF $(DEPDIR)/armaservermonitor-settings.Tpo -c -o armaservermonitor-settings.obj `if test -f 'settings.c'; then $(CYGPATH_W) 'settings.c'; else $(CYGPATH_W) '$(srcdir)/settings.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-settings.Tpo $(DEPDIR)/armaservermonitor-settings.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='settings.c' object='armaservermonitor-settings.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-settings.obj `if test -f 'settings.c'; then $(CYGPATH_W) 'settings.c'; else $(CYGPATH_W) '$(srcdir)/settings.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-settings.obj `if test -f 'settings.c'; then $(CYGPATH_W) 'settings.c'; else $(CYGPATH_W) '$(srcdir)/settings.c'; fi`
 
-asm-util.o: util.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-util.o -MD -MP -MF $(DEPDIR)/asm-util.Tpo -c -o asm-util.o `test -f 'util.c' || echo '$(srcdir)/'`util.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-util.Tpo $(DEPDIR)/asm-util.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util.c' object='asm-util.o' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-util.o: util.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-util.o -MD -MP -MF $(DEPDIR)/armaservermonitor-util.Tpo -c -o armaservermonitor-util.o `test -f 'util.c' || echo '$(srcdir)/'`util.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-util.Tpo $(DEPDIR)/armaservermonitor-util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util.c' object='armaservermonitor-util.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-util.o `test -f 'util.c' || echo '$(srcdir)/'`util.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-util.o `test -f 'util.c' || echo '$(srcdir)/'`util.c
 
-asm-util.obj: util.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -MT asm-util.obj -MD -MP -MF $(DEPDIR)/asm-util.Tpo -c -o asm-util.obj `if test -f 'util.c'; then $(CYGPATH_W) 'util.c'; else $(CYGPATH_W) '$(srcdir)/util.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/asm-util.Tpo $(DEPDIR)/asm-util.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util.c' object='asm-util.obj' libtool=no @AMDEPBACKSLASH@
+armaservermonitor-util.obj: util.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -MT armaservermonitor-util.obj -MD -MP -MF $(DEPDIR)/armaservermonitor-util.Tpo -c -o armaservermonitor-util.obj `if test -f 'util.c'; then $(CYGPATH_W) 'util.c'; else $(CYGPATH_W) '$(srcdir)/util.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/armaservermonitor-util.Tpo $(DEPDIR)/armaservermonitor-util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util.c' object='armaservermonitor-util.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asm_CFLAGS) $(CFLAGS) -c -o asm-util.obj `if test -f 'util.c'; then $(CYGPATH_W) 'util.c'; else $(CYGPATH_W) '$(srcdir)/util.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(armaservermonitor_CFLAGS) $(CFLAGS) -c -o armaservermonitor-util.obj `if test -f 'util.c'; then $(CYGPATH_W) 'util.c'; else $(CYGPATH_W) '$(srcdir)/util.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

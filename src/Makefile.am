@@ -2,18 +2,18 @@ EXTRA_DIST = Makefile.old
 
 AM_CFLAGS = -Wall -Werror -Wextra $(GLIB_CFLAGS)
 
-bin_PROGRAMS = asm
+bin_PROGRAMS = armaservermonitor
 check_PROGRAMS = test
 pkglib_LTLIBRARIES = asmdll.la
 
 # TODO: run the test program during "make check"
 #TESTS = ...
 
-asm_SOURCES = asm.h asm.c asmlog.h asmlog.c client.h client.c \
+armaservermonitor_SOURCES = asm.h asm.c asmlog.h asmlog.c client.h client.c \
  gettickcount.h gettickcount.c server.h server.c \
  settings.h settings.c util.h util.c
-asm_CFLAGS = $(AM_CFLAGS)
-asm_LDFLAGS = -lrt -lm $(GLIB_LIBS)
+armaservermonitor_CFLAGS = $(AM_CFLAGS)
+armaservermonitor_LDFLAGS = -lrt -lm $(GLIB_LIBS)
 
 asmdll_la_SOURCES = asmdll.h asmdll.c asmlog.h asmlog.c \
  gettickcount.h gettickcount.c settings.h settings.c util.h util.c
