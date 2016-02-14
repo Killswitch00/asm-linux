@@ -260,7 +260,7 @@ int main(int argc, char** argv)
 		if (sysv_daemon) {
 			asmlog_syslog(prog_name);
 		} else if (systemd) {
-			asmlog_systemd(prog_name);
+			asmlog_systemd();
 		} else {
 			asmlog_console();
 		}

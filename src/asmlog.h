@@ -24,7 +24,7 @@ extern int asmlog_level;
 
 void asmlog_console();
 void asmlog_stdout(const char* name);
-void asmlog_systemd(const char* name);
+void asmlog_systemd();
 void asmlog_syslog(const char* name);
 
 void asmlog_enable_debug(void);

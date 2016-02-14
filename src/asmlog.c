@@ -87,9 +87,9 @@ void asmlog_stdout(const char* name)
 }
 
 // Log to stdout with a "<n>" prefix at the beginning of the log message
-void asmlog_systemd(const char* name)
+void asmlog_systemd()
 {
-	asmlog_init(name, ASM_LOGDEST_STDOUT, ASM_LOGPREFIX_NUM);
+	asmlog_init(NULL, ASM_LOGDEST_STDOUT, ASM_LOGPREFIX_NUM);
 }
 
 // Send output to the system log
