@@ -183,7 +183,9 @@ int PID_start()
 		if (euid == 0) {
 			snprintf(pid_name, pid_name_len, "/var/run/%s.pid", prog_name);
 		} else {
-			snprintf(pid_name, pid_name_len, "./%s.pid", prog_name);
+			// Breaks for non-root user whose home dir is / (eg a non-login system user)
+			//snprintf(pid_name, pid_name_len, "./%s.pid", prog_name);
+			return 0;
 		}
 	}
 	asmlog_debug("PID_start: prog_name = %s, pid_name = \"%s\"", prog_name, pid_name);
