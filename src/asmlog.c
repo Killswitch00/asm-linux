@@ -121,7 +121,7 @@ void asmlog_close(void)
 
 static const char* asmlog_prefix(int level)
 {
-	const char* prefix;
+	const char* prefix = lognone;
 
 	switch (logprefix)
 	{
