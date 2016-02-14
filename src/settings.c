@@ -109,18 +109,22 @@ int read_settings(void)
 
 
 			// Last resort - perhaps there is a system-wide settings file?
+			snprintf(inipath, PATH_MAX - 1, "/etc/asm.ini");
 			ini_loaded = g_key_file_load_from_file(settings, "/etc/asm.ini", G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 
+			snprintf(inipath, PATH_MAX - 1, "/etc/ASM.ini");
 			ini_loaded = g_key_file_load_from_file(settings, "/etc/ASM.ini", G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 
+			snprintf(inipath, PATH_MAX - 1, "/usr/local/etc/asm.ini");
 			ini_loaded = g_key_file_load_from_file(settings, "/usr/local/etc/asm.ini", G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 
+			snprintf(inipath, PATH_MAX - 1, "/usr/local/etc/ASM.ini");
 			ini_loaded = g_key_file_load_from_file(settings, "/usr/local/etc/ASM.ini", G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
