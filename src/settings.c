@@ -61,7 +61,7 @@ int read_settings(void)
 	memset(inipath, 0, PATH_MAX);
 
 	home = getenv("HOME");
-	if (strcmp(home, "/") == 0) {
+	if (home && strcmp(home, "/") == 0) {
 		home = NULL;
 	}
 
