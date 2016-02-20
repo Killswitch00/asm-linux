@@ -557,11 +557,6 @@ int asmserver()
 
 	asmlog_info(PACKAGE_STRING);
 
-	if (read_settings()) {
-		asmlog_error("Could not read the ASM.ini settings file");
-		return EXIT_FAILURE;
-	}
-
 	// Open the shared memory area
 	if (init_shmem()) {
 		asmlog_error("Could not initalize the shared memory area");
