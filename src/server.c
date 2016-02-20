@@ -53,7 +53,6 @@ extern char*  prog_name;
 extern char** args;
 extern int    argsc;
 
-extern char*  host;
 extern char*  pid_name;
 extern int    pid_name_len;
 
@@ -576,7 +575,7 @@ int asmserver()
 
 	snprintf(portnum, PORT_STRLEN, "%d", port);
 
-	if ((rv = getaddrinfo(*host == '\0' ? NULL : host, portnum, &hints, &address_list)) != 0) {
+	if ((rv = getaddrinfo(NULL, portnum, &hints, &address_list)) != 0) {
 	    asmlog_error("asmserver(): getaddrinfo, %s", gai_strerror(rv));
 	    return EXIT_FAILURE;	// FIXME: cleanup
 	}
