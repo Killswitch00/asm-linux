@@ -64,6 +64,7 @@ extern int    running;
 static int    pid_name_created = 0;
 static int    connected_clients = 0;
 
+static mode_t orig_umask;
 static int    filemap_fd;
 static void*  filemap;
 static long   pagesize;
@@ -78,7 +79,9 @@ int init_shmem()
 
 	pagesize = sysconf(_SC_PAGESIZE); // 4 KiB or 2 MiB
 
-	filemap_fd = shm_open("/ASM_MapFile", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	orig_umask = umask(0);
+	filemap_fd = shm_open("/ASM_MapFile", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+	(void)umask(orig_umask);
 
 	if (filemap_fd < 0) {
 		asmlog_error("Could not create shared memory object, %s", strerror(errno));
