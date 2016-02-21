@@ -95,7 +95,6 @@ int init_shmem()
 		return 1;
 	}
 	if (filestat.st_size == 0) {
-		// First load of the extension - resize the shared memory for our needs
 		if (ftruncate(filemap_fd, FILEMAPSIZE) != 0) {
 			asmlog_error("Could not set shared memory object size, %s", strerror(errno));
 			shm_unlink("/ASM_MapFile");
@@ -521,6 +520,8 @@ int send_asi(int clientfd)
 			*((unsigned int *)p)   = asi->TICK_COUNT;    p += sizeof(unsigned int);   // 40
 			memcpy(p, asi->MISSION, SMALSTRINGSIZE);     p += SMALSTRINGSIZE;         // 72
 			memcpy(p, asi->PROFILE, SMALSTRINGSIZE);     p += SMALSTRINGSIZE;         // 104
+			asi->MISSION[SMALSTRINGSIZE - 1] = 0;
+			asi->PROFILE[SMALSTRINGSIZE - 1] = 0;
 		}
 	}
 	remaining = p - sendbuf;
