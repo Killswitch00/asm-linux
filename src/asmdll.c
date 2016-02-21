@@ -43,6 +43,7 @@
 #include <unistd.h>
 
 static long pagesize;
+static int firstload = 0;
 static int FileMapHandle = -1;
 static void* FileMap;
 static uint32_t InstanceID;
@@ -54,7 +55,6 @@ static struct timespec T0;
 void __attribute ((constructor)) libasm_open(void)
 {
 	mode_t orig_umask;
-	int firstload = 0;
 	char *debug = getenv("ASM_DEBUG");
 
 	if (debug && !strcmp(debug, "1")) {
@@ -95,7 +95,9 @@ void __attribute ((constructor)) libasm_open(void)
 	FileMap = mmap(NULL, FILEMAPSIZE, PROT_READ|PROT_WRITE, MAP_SHARED, FileMapHandle, 0);
 	if (FileMap == MAP_FAILED) {
 		FileMap = NULL;
-		shm_unlink("/ASM_MapFile");
+		if (firstload == 1) {
+			shm_unlink("/ASM_MapFile");
+		}
 		close(FileMapHandle);
 		asmlog_error("Could not memory map the object: %s", strerror(errno));
 		return;
@@ -127,7 +129,9 @@ void __attribute ((destructor)) libasm_close(void)
 		munmap(FileMap, FILEMAPSIZE);
 	}
 	if (FileMapHandle > -1) {
-		shm_unlink("/ASM_MapFile");
+		if (firstload == 1) {
+			shm_unlink("/ASM_MapFile");
+		}
 		close(FileMapHandle);
 	}
 	asmlog_debug("extension unloaded");

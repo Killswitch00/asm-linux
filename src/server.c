@@ -64,6 +64,7 @@ extern int    running;
 static int    pid_name_created = 0;
 static int    connected_clients = 0;
 
+static int    firstload = 0;
 static int    filemap_fd;
 static void*  filemap;
 static long   pagesize;
@@ -75,7 +76,6 @@ int init_shmem()
 {
 	mode_t orig_umask;
 	struct stat filestat;
-	int firstload = 0;
 
 	pagesize = sysconf(_SC_PAGESIZE); // 4 KiB or 2 MiB
 
@@ -107,7 +107,9 @@ int init_shmem()
 	filemap = mmap(NULL, FILEMAPSIZE, PROT_READ|PROT_WRITE, MAP_SHARED, filemap_fd, 0);
 	if (filemap == MAP_FAILED) {
 		filemap = NULL;
-		shm_unlink("/ASM_MapFile");
+		if (firstload == 1) {
+			shm_unlink("/ASM_MapFile");
+		}
 		close(filemap_fd);
 		asmlog_error("Could not memory map the object, %s", strerror(errno));
 		return 1;
@@ -127,7 +129,9 @@ void close_shmem(void)
 		munmap(filemap, FILEMAPSIZE);
 	}
 	if (filemap_fd > -1) {
-		shm_unlink("/ASM_MapFile");
+		if (firstload == 1) {
+			shm_unlink("/ASM_MapFile");
+		}
 		close(filemap_fd);
 	}
 }
