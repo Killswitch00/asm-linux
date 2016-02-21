@@ -64,7 +64,6 @@ extern int    running;
 static int    pid_name_created = 0;
 static int    connected_clients = 0;
 
-static mode_t orig_umask;
 static int    filemap_fd;
 static void*  filemap;
 static long   pagesize;
@@ -74,6 +73,7 @@ static long   pagesize;
  */
 int init_shmem()
 {
+	mode_t orig_umask;
 	struct stat filestat;
 	int firstload = 0;
 

@@ -53,6 +53,7 @@ static struct timespec T0;
 
 void __attribute ((constructor)) libasm_open(void)
 {
+	mode_t orig_umask;
 	int firstload = 0;
 	char *debug = getenv("ASM_DEBUG");
 
@@ -64,7 +65,10 @@ void __attribute ((constructor)) libasm_open(void)
 	asmlog_info(PACKAGE_STRING);
 
 	pagesize = sysconf(_SC_PAGESIZE);
-	FileMapHandle = shm_open("/ASM_MapFile", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+
+	orig_umask = umask(0);
+	FileMapHandle = shm_open("/ASM_MapFile", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+	(void)umask(orig_umask);
 
 	if (FileMapHandle < 0) {
 		asmlog_error("Could not create shared memory object: %s", strerror(errno));
