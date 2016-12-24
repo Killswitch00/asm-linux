@@ -636,6 +636,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+ASMDLL_NAME
 GLIB_LIBS
 GLIB_CFLAGS
 PKG_CONFIG_LIBDIR
@@ -12437,6 +12438,19 @@ else
 $as_echo "yes" >&6; }
 
 fi
+
+# The 64-bit Arma 3 extension must be named asmdll_x64.so
+
+case $host_cpu in #(
+  i?86) :
+    ASMDLL_NAME=asmdll ;; #(
+  x86_64) :
+    ASMDLL_NAME=asmdll_x64 ;; #(
+  *) :
+    as_fn_error $? "\"Unsupported CPU type $host_cpu\"" "$LINENO" 5
+ ;;
+esac
+
 
 # Finalize
 ac_config_files="$ac_config_files Makefile src/Makefile"

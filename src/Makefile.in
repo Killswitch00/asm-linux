@@ -124,17 +124,18 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(bindir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
-asmdll_la_LIBADD =
-am_asmdll_la_OBJECTS = asmdll.lo asmlog.lo gettickcount.lo settings.lo \
-	util.lo
-asmdll_la_OBJECTS = $(am_asmdll_la_OBJECTS)
+@ASMDLL_NAME@_la_LIBADD =
+am_@ASMDLL_NAME@_la_OBJECTS = asmdll.lo asmlog.lo gettickcount.lo \
+	settings.lo util.lo
+@ASMDLL_NAME@_la_OBJECTS = $(am_@ASMDLL_NAME@_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-asmdll_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(asmdll_la_LDFLAGS) $(LDFLAGS) -o $@
+@ASMDLL_NAME@_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(@ASMDLL_NAME@_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
 PROGRAMS = $(bin_PROGRAMS)
 am_armaservermonitor_OBJECTS = armaservermonitor-asm.$(OBJEXT) \
 	armaservermonitor-asmlog.$(OBJEXT) \
@@ -189,10 +190,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(asmdll_la_SOURCES) $(armaservermonitor_SOURCES) \
+SOURCES = $(@ASMDLL_NAME@_la_SOURCES) $(armaservermonitor_SOURCES) \
 	$(test_SOURCES)
-DIST_SOURCES = $(asmdll_la_SOURCES) $(armaservermonitor_SOURCES) \
-	$(test_SOURCES)
+DIST_SOURCES = $(@ASMDLL_NAME@_la_SOURCES) \
+	$(armaservermonitor_SOURCES) $(test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -223,6 +224,7 @@ ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
+ASMDLL_NAME = @ASMDLL_NAME@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -340,7 +342,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = Makefile.old
 AM_CFLAGS = -Wall -Werror -Wextra $(GLIB_CFLAGS)
-pkglib_LTLIBRARIES = asmdll.la
+pkglib_LTLIBRARIES = @ASMDLL_NAME@.la
 
 # TODO: run the test program during "make check"
 #TESTS = ...
@@ -350,10 +352,10 @@ armaservermonitor_SOURCES = asm.h asm.c asmlog.h asmlog.c client.h client.c \
 
 armaservermonitor_CFLAGS = $(AM_CFLAGS)
 armaservermonitor_LDFLAGS = -lrt -lm $(GLIB_LIBS)
-asmdll_la_SOURCES = asmdll.h asmdll.c asmlog.h asmlog.c \
+@ASMDLL_NAME@_la_SOURCES = = asmdll.h asmdll.c asmlog.h asmlog.c \
  gettickcount.h gettickcount.c settings.h settings.c util.h util.c
 
-asmdll_la_LDFLAGS = -avoid-version -module -lrt -lm $(GLIB_LIBS)
+@ASMDLL_NAME@_la_LDFLAGS = -avoid-version -module -lrt -lm $(GLIB_LIBS)
 test_SOURCES = test.c
 test_LDFLAGS = -ldl
 all: config.h
@@ -442,8 +444,8 @@ clean-pkglibLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-asmdll.la: $(asmdll_la_OBJECTS) $(asmdll_la_DEPENDENCIES) $(EXTRA_asmdll_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(asmdll_la_LINK) -rpath $(pkglibdir) $(asmdll_la_OBJECTS) $(asmdll_la_LIBADD) $(LIBS)
+@ASMDLL_NAME@.la: $(@ASMDLL_NAME@_la_OBJECTS) $(@ASMDLL_NAME@_la_DEPENDENCIES) $(EXTRA_@ASMDLL_NAME@_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(@ASMDLL_NAME@_la_LINK) -rpath $(pkglibdir) $(@ASMDLL_NAME@_la_OBJECTS) $(@ASMDLL_NAME@_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \

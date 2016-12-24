@@ -20,6 +20,15 @@ AC_PROG_INSTALL
 # Checks for required libraries
 PKG_CHECK_MODULES([GLIB],[glib-2.0])
 
+# The 64-bit Arma 3 extension must be named asmdll_x64.so
+AC_CANONICAL_HOST
+AS_CASE([$host_cpu],
+    [i?86], [ASMDLL_NAME=asmdll],
+    [x86_64], [ASMDLL_NAME=asmdll_x64],
+    [AC_MSG_ERROR("Unsupported CPU type $host_cpu")]
+)
+AC_SUBST(ASMDLL_NAME)
+
 # Finalize
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
