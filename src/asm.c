@@ -41,6 +41,7 @@ char*  log_prefix;
 char*  log_prefix_default = "ASMlog";
 int    log_interval;
 
+pid_t  pid;
 char*  pid_name;
 size_t pid_name_len;
 
@@ -54,7 +55,7 @@ int    instance_set = 0; // 0...3, which set of 4 instances should be reported b
 char*  host;
 int    port = 24000;
 
-int    running = 0;
+volatile sig_atomic_t running = 0;
 int    once = 1;  // Client: display stats once, not continously. TODO: add option
 
 void usage(const char* prog_name)
@@ -73,18 +74,14 @@ void handle_signal(int s)
 			/* TODO: re-read config.
 			 * Could be used to re-initalize the service if the need arises.
 			 */
-			asmlog_debug("PID %d: got SIGHUP", getpid());
 			break;
 		case SIGINT:
-			asmlog_debug("PID %d: got SIGINT", getpid());
 			running = 0;
 			break;
 		case SIGTERM:
-			asmlog_debug("PID %d: got SIGTERM", getpid());
 			running = 0;
 			break;
 		default:
-			asmlog_info("PID %d, got signal %d", getpid(), s);
 			break;
 	}
 }
@@ -249,6 +246,7 @@ int main(int argc, char** argv)
 #endif
 
 	// Handle HUP, kill and CTRL-C
+	pid = getpid();
 	memset(&sa, 0, sizeof sa);
 	sa.sa_handler = handle_signal;
 	sa.sa_flags = 0;

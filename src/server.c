@@ -53,6 +53,7 @@ extern char*  prog_name;
 extern char** args;
 extern int    argsc;
 
+extern pid_t  pid;
 extern char*  pid_name;
 extern int    pid_name_len;
 
@@ -216,9 +217,8 @@ int PID_start()
 		close(fd);
 		return 1;
 	} else {
-		pid_t pid, oldpid;
+		pid_t oldpid;
 
-		pid = getpid();
 		if (fscanf(pf, "%5d", &oldpid) == 1) {
 			/*  TODO: ok, so who is this PID then?
 			 *  If a process with that PID does not exist, carry on.
