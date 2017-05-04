@@ -332,3 +332,14 @@ void RVExtension(char *output, int outputSize, const char *function)
 	}
 	return;
 }
+
+/* Not used by ASM.pbo */
+int RVExtensionArgs(char *output, int outputSize, const char *function, const char **args, int argsCnt)
+{
+	(void)args;
+	(void)argsCnt;
+
+	RVExtension(output, outputSize, function);
+
+	return 0;
+}
