@@ -139,6 +139,14 @@ void __attribute ((destructor)) libasm_close(void)
 }
 
 
+void RVExtensionVersion(char *output, int outputSize)
+{
+	if (output == NULL || outputSize <= 0) return;
+
+	snprintf(output, outputSize, "%s", ASM_VERSION);
+}
+
+
 void RVExtension(char *output, int outputSize, const char *function)
 {
 	char *stopstring;

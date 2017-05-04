@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+void RVExtensionVersion(char *output, int outputSize);
 void RVExtension(char *output, int outputSize, const char *function);
 
 #ifdef  __cplusplus
