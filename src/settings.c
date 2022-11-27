@@ -52,7 +52,7 @@ asm_settings settings = {
 int read_settings(void)
 {
 	int   status   = 0;
-	char* home     = NULL;
+	const char *home;
 	char  inipath[PATH_MAX];
 
 	GKeyFile* asm_ini    = NULL;
@@ -63,8 +63,8 @@ int read_settings(void)
 	memset(inipath, 0, PATH_MAX);
 
 	home = getenv("HOME");
-	if (home && strcmp(home, "/") == 0) {
-		home = NULL;
+	if (home == NULL) {
+		home = "";
 	}
 
 	asm_ini = g_key_file_new();
