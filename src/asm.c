@@ -43,14 +43,9 @@ int    argsc;
 char*  log_prefix;
 int    log_interval;
 
-pid_t  pid;
-char   pid_name[PATH_MAX];
-size_t pid_name_len = sizeof(pid_name);
-
 int    server = 0;
 int    client = 1;
 int    max_clients  = 1;
-int    sysv_daemon  = 0;
 int    systemd      = 0;
 int    instance_set = 0; // 0...3, which set of 4 instances should be reported by the client?
 
@@ -96,21 +91,17 @@ void handle_signal(int s)
  *  -p      port to listen or to connect to (default: 24000)
  *  -l      prefix for and activation of client-side logfile (default: ./asm.log)
  *  -t      interval for logging, in seconds (default: 1)
- *  -i      PID file
  *  -o      When running as a client, Which set of four instances shall be reported? range 0..3, (default: 0)
  *
  *  -d      Enable debug-level log messages
- *  -b      (server) Run in the background as a SysV style daemon.
  *  -y      (server) Run as a systemd service, logging to stdout
  *
  */
 int main(int argc, char** argv)
 {
 	int option;
-	int b_seen = 0;
 	int c_seen = 0;
 	int s_seen = 0;
-	int y_seen = 0;
 	int usage_error = 0;
 	int status = EXIT_SUCCESS;
 	struct sigaction sa;
@@ -124,13 +115,8 @@ int main(int argc, char** argv)
 	args  = argv;
 	argsc = argc;
 
-	while (usage_error == 0 && (option = getopt(argc, argv, "bcdh:i:l::n:o:p:st:y")) != -1) {
+	while (usage_error == 0 && (option = getopt(argc, argv, "cdh:l::n:o:p:st:y")) != -1) {
 		switch (option) {
-			case 'b':
-				sysv_daemon = 1;
-				b_seen = 1;
-				if (y_seen == 1) usage_error = 1;
-				break;
 			case 'c':
 				server = 0;
 				client = 1;
@@ -142,9 +128,6 @@ int main(int argc, char** argv)
 				break;
 			case 'h':
 				snprintf(host, sizeof(host), "%s", optarg);
-				break;
-			case 'i':
-				snprintf(pid_name, sizeof(pid_name), "%s", optarg);
 				break;
 			case 'l':
 				log_prefix = strdup(optarg);
@@ -199,7 +182,6 @@ int main(int argc, char** argv)
 				break;
 			case 'y':
 				systemd = 1;
-				if (b_seen == 1) usage_error = 1;
 				break;
 			default:
 				usage_error = 1;
@@ -232,7 +214,6 @@ int main(int argc, char** argv)
 #endif
 
 	// Handle HUP, kill and CTRL-C
-	pid = getpid();
 	memset(&sa, 0, sizeof sa);
 	sa.sa_handler = handle_signal;
 	sa.sa_flags = 0;
@@ -241,9 +222,7 @@ int main(int argc, char** argv)
 	sigaction(SIGTERM, &sa, NULL);
 
 	if (server) {
-		if (sysv_daemon) {
-			asmlog_syslog(prog_name);
-		} else if (systemd) {
+		if (systemd) {
 			asmlog_systemd();
 		} else {
 			asmlog_console();
