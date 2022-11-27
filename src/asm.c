@@ -33,13 +33,13 @@
 #include "client.h"
 #include "server.h"
 
+#define LOG_PREFIX_DEFAULT "ASMlog"
+
 char*  prog_name;
 char** args;
 int    argsc;
 
-size_t log_prefix_len;
 char*  log_prefix;
-char*  log_prefix_default = "ASMlog";
 int    log_interval;
 
 pid_t  pid;
@@ -163,13 +163,8 @@ int main(int argc, char** argv)
 				pid_name[pid_name_len - 1] = '\0';
 				break;
 			case 'l':
-				if (optarg != NULL) {
-					if (log_interval == 0) log_interval = 1;
-					log_prefix_len = strlen(optarg) + 1;
-					log_prefix = calloc(log_prefix_len, 1);
-					strncpy(log_prefix, optarg, log_prefix_len);
-					log_prefix[log_prefix_len - 1] = '\0';
-				}
+				log_prefix = strdup(optarg);
+				if (log_interval == 0) log_interval = 1;
 				break;
 			case 'n':
 				if (isdigit(*optarg)) {
@@ -233,13 +228,13 @@ int main(int argc, char** argv)
 		goto cleanup;
 	}
 
+	if (log_prefix == NULL) {
+		log_prefix = strdup(LOG_PREFIX_DEFAULT);
+	}
+
 	if (client) {
 		if (*host == '\0') {
 			strcpy(host, "localhost");
-		}
-
-		if (log_prefix == NULL || *log_prefix == '\0') {
-			log_prefix = log_prefix_default;
 		}
 	}
 #ifdef SHOW_OPTIONS
@@ -282,7 +277,7 @@ cleanup:
 	free(host);
 	free(pid_name);
 	free(prog_name);
-	if (log_prefix && log_prefix != log_prefix_default) free(log_prefix);
+	free(log_prefix);
 
 	return status;
 }
