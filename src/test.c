@@ -26,7 +26,7 @@
 
 #include "asm.h"
 
-#define SLEEP 60
+#define SLEEP 5
 
 typedef void (*callextension)(char *output, int outputSize, const char *function);
 
@@ -34,24 +34,31 @@ int main(void)
 {
 	char output[OUTPUTSIZE];
 	int instance = -1;
-	char* error;
-	void* handle = NULL;
+	char *error;
+	void *handle = NULL;
 	callextension RVExtension = NULL;
 
-
 	dlerror();
-	handle = dlopen("./asmdll.so", RTLD_LAZY);
 
-	if (!handle) {
+#if __x86_64__
+	handle = dlopen("./asmdll_x64.so", RTLD_LAZY);
+	if (handle == NULL) {
+		handle = dlopen("asmdll_x64.so", RTLD_LAZY);
+	}
+#else
+	handle = dlopen("./asmdll.so", RTLD_LAZY);
+	if (handle == NULL) {
 		handle = dlopen("asmdll.so", RTLD_LAZY);
 	}
+#endif
 
-	if (!handle) {
+	if (handle == NULL) {
 		fprintf(stderr, "Could not open the ASM library: %s\n", dlerror());
 		return -1;
 	}
 
 	dlerror();
+
 	RVExtension = (callextension)dlsym(handle, "RVExtension");
 	if ((error = dlerror()) != 0L)
 	{
@@ -65,43 +72,42 @@ int main(void)
 		goto close;
 	}
 
-	(*RVExtension)(output, OUTPUTSIZE, "version");
+	RVExtension(output, OUTPUTSIZE, "version");
 	printf("Library version = %s\n", output);
 
 
 	// 9: INIT, "ASMdll" callExtension format ["9:%1", profileName]
-	(*RVExtension)(output, OUTPUTSIZE, "9:test");
+	RVExtension(output, OUTPUTSIZE, "9:test");
 	printf("init: %s\n", output);
 
-	(*RVExtension)(output, OUTPUTSIZE, "id");
+	RVExtension(output, OUTPUTSIZE, "id");
 	printf("Instance id = %s\n", output);
 	instance = atoi(output);
 
 	// 0: FPS update, "ASMdll" RVExtension format ["0:%1:%2", round (diag_fps*1000),round (diag_fpsmin*1000)];
-	(*RVExtension)(output, OUTPUTSIZE, "0:50:25");
+	RVExtension(output, OUTPUTSIZE, "0:50:25");
 
 	// 1: CPS update, "ASMdll" RVExtension format [""1:%1"", _c];
-	(*RVExtension)(output, OUTPUTSIZE, "1:10");
+	RVExtension(output, OUTPUTSIZE, "1:10");
 
 	// 2: GEN update:
 	// "_Players = {(alive _x)&&(isPlayer _x)} count _units;" \n
         // "_locAIs = {(alive _x)&&(local _x)} count _units;" \n
         // "_remAIs = ({alive _x} count _units) - _Players - _locAIs;" \n"
 	// ""ASMdll"" RVExtension format [""2:%1:%2:%3"", _Players, _locAIs, _remAIs];"
-	(*RVExtension)(output, OUTPUTSIZE, "2:8:100:50");
-	printf("%s\n", output);
+	RVExtension(output, OUTPUTSIZE, "2:8:100:50");
 
 	// 3: MISSION update, "ASMdll" RVExtension format ["3:%1",  missionName];
-	(*RVExtension)(output, OUTPUTSIZE, "3:asmtest");
+	RVExtension(output, OUTPUTSIZE, "3:asmtest");
 
 	// 4: OCC0 update, "ASMdll" RVExtension format ["4:%1", _oc0];
-	(*RVExtension)(output, OUTPUTSIZE, "4:4");
+	RVExtension(output, OUTPUTSIZE, "4:4");
 
 	// 5: OCC1 update, "ASMdll" RVExtension format ["5:%1", _oc1];
-	(*RVExtension)(output, OUTPUTSIZE, "5:5");
+	RVExtension(output, OUTPUTSIZE, "5:5");
 
 	// 6: OCC2 update, "ASMdll" RVExtension format ["6:%1", _oc2];
-	(*RVExtension)(output, OUTPUTSIZE, "6:6");
+	RVExtension(output, OUTPUTSIZE, "6:6");
 
 	// Simulate a long-running A3 server instance
 	printf("Instance %d: sleeping for %d seconds...\n", instance, SLEEP);
