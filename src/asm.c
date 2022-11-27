@@ -105,14 +105,17 @@ void handle_signal(int s)
  */
 int main(int argc, char** argv)
 {
-	int option, usage_error, status = EXIT_SUCCESS;
-	int c_seen, b_seen, s_seen, y_seen;
+	int option;
+	int b_seen = 0;
+	int c_seen = 0;
+	int s_seen = 0;
+	int y_seen = 0;
+	int usage_error = 0;
+	int status = EXIT_SUCCESS;
 	struct sigaction sa;
 
-	c_seen = b_seen = s_seen = y_seen = 0;
-	usage_error = 0;
-
-	if ((prog_name = strdup(basename(argv[0]))) == NULL) {
+	prog_name = strdup(basename(argv[0]));
+	if (prog_name == NULL) {
 		perror("malloc");
 		status = EXIT_FAILURE;
 		goto cleanup;
@@ -121,12 +124,15 @@ int main(int argc, char** argv)
 	argsc = argc;
 
 	pid_name_len = (size_t)sysconf(_PC_PATH_MAX);
-	if ((pid_name = (char *)calloc(pid_name_len, 1)) == NULL) {
+	pid_name = (char *)calloc(pid_name_len, 1);
+	if (pid_name == NULL) {
 		perror("calloc");
 		status = EXIT_FAILURE;
 		goto cleanup;
 	}
-	if ((host = (char *)calloc(INET6_ADDRSTRLEN, 1)) == NULL) {
+
+	host = (char *)calloc(INET6_ADDRSTRLEN, 1);
+	if (host == NULL) {
 		perror("calloc");
 		status = EXIT_FAILURE;
 		goto cleanup;
@@ -222,9 +228,9 @@ int main(int argc, char** argv)
 	}
 
 	if (usage_error == 1) {
-			usage(prog_name);
-			status = EXIT_FAILURE;
-			goto cleanup;
+		usage(prog_name);
+		status = EXIT_FAILURE;
+		goto cleanup;
 	}
 
 	if (client) {
@@ -273,9 +279,9 @@ int main(int argc, char** argv)
 	}
 
 cleanup:
-	if (host)      free(host);
-	if (pid_name)  free(pid_name);
-	if (prog_name) free(prog_name);
+	free(host);
+	free(pid_name);
+	free(prog_name);
 	if (log_prefix && log_prefix != log_prefix_default) free(log_prefix);
 
 	return status;
