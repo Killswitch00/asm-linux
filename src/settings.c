@@ -137,98 +137,88 @@ int read_settings(void)
 
 		if (ini_loaded)
 		{
-			int ival;
+			GError *error = NULL;
+			gint ival;
 			gchar *value;
 
 			asmlog_info("Reading settings from %s", inipath);
 
-			value = g_key_file_get_string(asm_ini, "ASM", "enableAPImonitoring", NULL);
-			if (value != NULL)
-			{
-				if (isdigit(*value))
-				{
-					ival = atoi(value);
-					if (errno == 0 && ival >= 0 && ival < 3) {
-						settings.enableAPImonitoring = ival;
-					}
+			ival = g_key_file_get_integer(asm_ini, "ASM", "enableAPImonitoring", &error);
+			if (error != NULL) {
+				g_clear_error(&error);
+			} else {
+				if (ival >= 0 && ival < 3) {
+					settings.enableAPImonitoring = ival;
 				}
-				free(value);
 			}
 
-			value = g_key_file_get_string(asm_ini, "ASM", "enableProfilePrefixSlotSelection", NULL);
-			if (value != NULL)
-			{
-				if (isdigit(*value))
-				{
-					ival = atoi(value);
-					if (errno == 0 && ival >= 0 && ival < 2) {
-						settings.enableProfilePrefixSlotSelection = ival;
-					}
+			ival = g_key_file_get_integer(asm_ini, "ASM", "enableProfilePrefixSlotSelection", &error);
+			if (error != NULL) {
+				g_clear_error(&error);
+			} else {
+				if (ival >= 0 && ival < 2) {
+					settings.enableProfilePrefixSlotSelection = ival;
 				}
-				free(value);
 			}
 
-			value = g_key_file_get_string(asm_ini, "ASM", "objectcountinterval0", NULL);
-			if (value != NULL)
-			{
-				if (isdigit(*value))
-				{
-					ival = atoi(value);
-					if (errno == 0 && ival >= 0) {
-						strncpy(settings.OCI0, value, sizeof(settings.OCI0));
-						settings.OCI0[sizeof(settings.OCI0) - 1] = '\0';
-					}
+			ival = g_key_file_get_integer(asm_ini, "ASM", "objectcountinterval0", &error);
+			if (error != NULL) {
+				g_clear_error(&error);
+			} else {
+				if (ival >= 0) {
+					snprintf(settings.OCI0, sizeof(settings.OCI0), "%d", ival);
+					settings.OCI0[sizeof(settings.OCI0) - 1] = '\0';
 				}
-				free(value);
 			}
 
-			value = g_key_file_get_string(asm_ini, "ASM", "objectcountinterval1", NULL);
-			if (value != NULL)
-			{
-				if (isdigit(*value))
-				{
-					ival = atoi(value);
-					if (errno == 0 && ival >= 0) {
-						strncpy(settings.OCI1, value, sizeof(settings.OCI1));
-						settings.OCI1[sizeof(settings.OCI1) - 1] = '\0';
-					}
+			ival = g_key_file_get_integer(asm_ini, "ASM", "objectcountinterval1", &error);
+			if (error != NULL) {
+				g_clear_error(&error);
+			} else {
+				if (ival >= 0) {
+					snprintf(settings.OCI1, sizeof(settings.OCI1), "%d", ival);
+					settings.OCI1[sizeof(settings.OCI1) - 1] = '\0';
 				}
-				free(value);
 			}
 
-			value = g_key_file_get_string(asm_ini, "ASM", "objectcountinterval2", NULL);
-			if (value != NULL)
-			{
-				if (isdigit(*value))
-				{
-					ival = atoi(value);
-					if (errno == 0 && ival >= 0) {
-						strncpy(settings.OCI2, value, sizeof(settings.OCI2));
-						settings.OCI2[sizeof(settings.OCI2) - 1] = '\0';
-					}
+			ival = g_key_file_get_integer(asm_ini, "ASM", "objectcountinterval2", &error);
+			if (error != NULL) {
+				g_clear_error(&error);
+			} else {
+				if (ival >= 0) {
+					snprintf(settings.OCI2, sizeof(settings.OCI2), "%d", ival);
+					settings.OCI2[sizeof(settings.OCI2) - 1] = '\0';
 				}
-				free(value);
 			}
 
-			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand0", NULL);
-			if (value != NULL) {
-				strncpy(settings.OCC0, value, sizeof(settings.OCC0));
-				settings.OCC0[sizeof(settings.OCC0) - 1] = '\0';
-				free(value);
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand0", &error);
+			if (error != NULL) {
+				g_clear_error(&error);
+			} else {
+				if (strlen(value) < sizeof(settings.OCC0)) {
+					snprintf(settings.OCC0, sizeof(settings.OCC0), "%s", value);
+				}
+				g_free(value);
 			}
 
-			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand1", NULL);
-			if (value != NULL) {
-				strncpy(settings.OCC1, value, sizeof(settings.OCC1));
-				settings.OCC1[sizeof(settings.OCC1) - 1] = '\0';
-				free(value);
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand1", &error);
+			if (error != NULL) {
+				g_clear_error(&error);
+			} else {
+				if (strlen(value) < sizeof(settings.OCC1)) {
+					snprintf(settings.OCC1, sizeof(settings.OCC1), "%s", value);
+				}
+				g_free(value);
 			}
 
-			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand2", NULL);
-			if (value != NULL) {
-				strncpy(settings.OCC2, value, sizeof(settings.OCC2));
-				settings.OCC2[sizeof(settings.OCC2) - 1] = '\0';
-				free(value);
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand2", &error);
+			if (error != NULL) {
+				g_clear_error(&error);
+			} else {
+				if (strlen(value) < sizeof(settings.OCC2)) {
+					snprintf(settings.OCC2, sizeof(settings.OCC2), "%s", value);
+				}
+				g_free(value);
 			}
 		}
 		else
