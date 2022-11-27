@@ -21,11 +21,15 @@
 #include <stdint.h>
 #include <time.h>
 
-// Emulates the Win32 API call
+/*
+ * Emulates the Win32 GetTickCount API call
+ *
+ * https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-gettickcount
+ */
 uint32_t gettickcount()
 {
         struct timespec ts;
 
-        clock_gettime(CLOCK_MONOTONIC, &ts);
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
         return (1000 * ts.tv_sec + ts.tv_nsec / 1000000);
 }
