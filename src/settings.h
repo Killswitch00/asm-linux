@@ -37,6 +37,6 @@ typedef struct {
 
 extern asm_settings settings;
 
-int read_settings(void);
+void read_settings(void);
 
 #endif /* ASMSETTINGS_H */
