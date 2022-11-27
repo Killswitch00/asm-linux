@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <libgen.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,8 +44,8 @@ char*  log_prefix;
 int    log_interval;
 
 pid_t  pid;
-char*  pid_name;
-size_t pid_name_len;
+char   pid_name[PATH_MAX];
+size_t pid_name_len = sizeof(pid_name);
 
 int    server = 0;
 int    client = 1;
@@ -53,7 +54,7 @@ int    sysv_daemon  = 0;
 int    systemd      = 0;
 int    instance_set = 0; // 0...3, which set of 4 instances should be reported by the client?
 
-char*  host;
+char   host[INET6_ADDRSTRLEN];
 int    port = 24000;
 
 volatile sig_atomic_t running = 0;
@@ -114,29 +115,14 @@ int main(int argc, char** argv)
 	int status = EXIT_SUCCESS;
 	struct sigaction sa;
 
-	prog_name = strdup(basename(argv[0]));
-	if (prog_name == NULL) {
-		perror("malloc");
-		status = EXIT_FAILURE;
-		goto cleanup;
+	if (argc > 0) {
+		prog_name = strdup(basename(argv[0]));
+	} else {
+		prog_name = strdup("armaservermonitor");
 	}
+
 	args  = argv;
 	argsc = argc;
-
-	pid_name_len = (size_t)sysconf(_PC_PATH_MAX);
-	pid_name = (char *)calloc(pid_name_len, 1);
-	if (pid_name == NULL) {
-		perror("calloc");
-		status = EXIT_FAILURE;
-		goto cleanup;
-	}
-
-	host = (char *)calloc(INET6_ADDRSTRLEN, 1);
-	if (host == NULL) {
-		perror("calloc");
-		status = EXIT_FAILURE;
-		goto cleanup;
-	}
 
 	while (usage_error == 0 && (option = getopt(argc, argv, "bcdh:i:l::n:o:p:st:y")) != -1) {
 		switch (option) {
@@ -155,12 +141,10 @@ int main(int argc, char** argv)
 				asmlog_enable_debug();
 				break;
 			case 'h':
-				strncpy(host, optarg, INET6_ADDRSTRLEN);
-				host[INET6_ADDRSTRLEN - 1] = '\0';
+				snprintf(host, sizeof(host), "%s", optarg);
 				break;
 			case 'i':
-				strncpy(pid_name, optarg, pid_name_len);
-				pid_name[pid_name_len - 1] = '\0';
+				snprintf(pid_name, sizeof(pid_name), "%s", optarg);
 				break;
 			case 'l':
 				log_prefix = strdup(optarg);
@@ -234,7 +218,7 @@ int main(int argc, char** argv)
 
 	if (client) {
 		if (*host == '\0') {
-			strcpy(host, "localhost");
+			snprintf(host, sizeof(host), "%s", "localhost");
 		}
 	}
 #ifdef SHOW_OPTIONS
@@ -274,10 +258,8 @@ int main(int argc, char** argv)
 	}
 
 cleanup:
-	free(host);
-	free(pid_name);
-	free(prog_name);
 	free(log_prefix);
+	free(prog_name);
 
 	return status;
 }

@@ -55,7 +55,7 @@ extern int    argsc;
 
 extern pid_t  pid;
 extern char*  pid_name;
-extern int    pid_name_len;
+extern size_t pid_name_len;
 
 extern int    port;
 extern int    max_clients;

@@ -37,7 +37,7 @@
 
 #define BUFSIZE (MAX_ARMA_INSTANCES * sizeof(struct ARMA_SERVER_INFO))
 
-extern char* host;
+extern char host[];
 extern int port;
 extern int running;
 extern int once;
@@ -74,7 +74,7 @@ int asmclient(int instance_set)
 
 	asmlog_info("Connecting to %s:%d", host, port);
 
-	if ((rv = getaddrinfo(*host == '\0' ? "localhost" : host, portnum, &hints, &serverinfo)) !=0 ) {
+	if ((rv = getaddrinfo(host, portnum, &hints, &serverinfo)) !=0 ) {
 		asmlog_error("asmclient: getaddrinfo, %s", gai_strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -97,6 +97,7 @@ int asmclient(int instance_set)
 
 	if (p == NULL) {
 		asmlog_error("Could not connect to %s:%d", host, port);
+		freeaddrinfo(serverinfo);
 		return EXIT_FAILURE;
 	}
 
