@@ -18,13 +18,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "asm.h"
-#include "asmlog.h"
-#include "settings.h"
-#include "asmdll.h"
-#include "gettickcount.h"
-#include "util.h"
-
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -41,6 +34,13 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+
+#include "asm.h"
+#include "asmlog.h"
+#include "settings.h"
+#include "asmdll.h"
+#include "gettickcount.h"
+#include "util.h"
 
 static long pagesize;
 static int firstload = 0;

@@ -18,13 +18,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "asm.h"
 #include <ctype.h>
 #include <dlfcn.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 
+#include "asm.h"
 
 #define SLEEP 60
 

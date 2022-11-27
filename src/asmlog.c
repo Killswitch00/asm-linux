@@ -17,8 +17,6 @@
  * License along with Arma Server Monitor for Linux; if not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "config.h"
-#include "asmlog.h"
 
 #ifdef ENABLE_SYSTEMD_JOURNAL
 #include <systemd/sd-journal.h>
@@ -29,6 +27,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "config.h"
+#include "asmlog.h"
 
 enum logprefix {
 	ASM_LOGPREFIX_NONE, // no prefix

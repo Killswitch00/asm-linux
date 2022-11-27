@@ -17,7 +17,9 @@
  * License along with Arma Server Monitor for Linux; if not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <arpa/inet.h>
+
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)

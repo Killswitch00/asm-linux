@@ -17,10 +17,6 @@
  * License along with Arma Server Monitor for Linux; if not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "asm.h"
-#include "asmlog.h"
-#include "client.h"
-#include "server.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -31,6 +27,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+
+#include "asm.h"
+#include "asmlog.h"
+#include "client.h"
+#include "server.h"
 
 char*  prog_name;
 char** args;
@@ -56,7 +57,7 @@ char*  host;
 int    port = 24000;
 
 volatile sig_atomic_t running = 0;
-int    once = 1;  // Client: display stats once, not continously. TODO: add option
+int    once = 1;  // Client: display stats once, not continuously. TODO: add option
 
 void usage(const char* prog_name)
 {

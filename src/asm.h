@@ -20,11 +20,11 @@
 #ifndef ASM_H_
 #define ASM_H_
 
-#include "config.h"
-
 #include <stdint.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "config.h"
 
 #define ASM_VERSION VERSION
 

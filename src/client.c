@@ -18,11 +18,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "asm.h"
-#include "asmlog.h"
-#include "config.h"
-#include "util.h"
-
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netdb.h>
@@ -34,6 +29,11 @@
 #include <sys/socket.h>
 #include <time.h>
 #include <unistd.h>
+
+#include "asm.h"
+#include "asmlog.h"
+#include "config.h"
+#include "util.h"
 
 #define BUFSIZE (MAX_ARMA_INSTANCES * sizeof(struct ARMA_SERVER_INFO))
 

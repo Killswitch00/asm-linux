@@ -18,14 +18,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "asm.h"
-#include "asmlog.h"
-#include "config.h"
-#include "server.h"
-#include "settings.h"
-#include "util.h"
-#include "gettickcount.h"
-
 // For glibc 2.10 and earlier, this is needed for getline()
 #define _GNU_SOURCE
 
@@ -48,6 +40,14 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <netdb.h>
+
+#include "asm.h"
+#include "asmlog.h"
+#include "config.h"
+#include "server.h"
+#include "settings.h"
+#include "util.h"
+#include "gettickcount.h"
 
 extern char*  prog_name;
 extern char** args;
