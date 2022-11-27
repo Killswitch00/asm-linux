@@ -22,14 +22,20 @@
 #ifndef ASMSETTINGS_H
 #define ASMSETTINGS_H
 
-extern int enableAPImonitoring;
-extern int enableProfilePrefixSlotSelection;
-extern char OCI0[];
-extern char OCI1[];
-extern char OCI2[];
-extern char OCC0[];
-extern char OCC1[];
-extern char OCC2[];
+#include "asm.h"
+
+typedef struct {
+	int enableAPImonitoring;
+	int enableProfilePrefixSlotSelection;
+	char OCI0[SMALSTRINGSIZE];
+	char OCI1[SMALSTRINGSIZE];
+	char OCI2[SMALSTRINGSIZE];
+	char OCC0[FUNCTIONSIZE];
+	char OCC1[FUNCTIONSIZE];
+	char OCC2[FUNCTIONSIZE];
+} asm_settings;
+
+extern asm_settings settings;
 
 int read_settings(void);
 

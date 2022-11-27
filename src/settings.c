@@ -28,18 +28,20 @@
 
 #include "asm.h"
 #include "asmlog.h"
+#include "settings.h"
 #include "util.h"
 
 // Settings and their default values
-int  enableAPImonitoring  =  0;				// Because not implemented
-int  enableProfilePrefixSlotSelection = 1;
-char OCI0[SMALSTRINGSIZE] = "30";
-char OCI1[SMALSTRINGSIZE] = "60";
-char OCI2[SMALSTRINGSIZE] = "0";
-char OCC0[FUNCTIONSIZE]   = "count entities \"\"All\"\";";
-char OCC1[FUNCTIONSIZE]   = "count vehicles;";
-char OCC2[FUNCTIONSIZE]   = "count allMissionObjects \"\"All\"\";";
-
+asm_settings settings = {
+	.enableAPImonitoring = 0,  // Not implemented
+	.enableProfilePrefixSlotSelection = 1,
+	.OCI0 = "30",
+	.OCI1 = "60",
+	.OCI2 = "0",
+	.OCC0 = "count entities \"\"All\"\";",
+	.OCC1 = "count vehicles;",
+	.OCC2 = "count allMissionObjects \"\"All\"\";"
+};
 
 /*
  * Read settings from the ASM.ini file.
@@ -53,7 +55,7 @@ int read_settings(void)
 	char* home     = NULL;
 	char  inipath[PATH_MAX];
 
-	GKeyFile* settings   = NULL;
+	GKeyFile* asm_ini    = NULL;
 	GError*   gerror     = NULL;
 	gboolean  ini_loaded = FALSE;
 
@@ -65,8 +67,8 @@ int read_settings(void)
 		home = NULL;
 	}
 
-	settings = g_key_file_new();
-	if (settings == NULL)
+	asm_ini = g_key_file_new();
+	if (asm_ini == NULL)
 	{
 		// TODO: log the error
 		status = -1;
@@ -77,12 +79,12 @@ int read_settings(void)
 		{
 			// First, try loading ASM.ini from the current working directory
 			snprintf(inipath, PATH_MAX - 1, "./asm.ini");
-			ini_loaded = g_key_file_load_from_file(settings, inipath, G_KEY_FILE_NONE, &gerror);
+			ini_loaded = g_key_file_load_from_file(asm_ini, inipath, G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 
 			snprintf(inipath, PATH_MAX - 1, "./ASM.ini");
-			ini_loaded = g_key_file_load_from_file(settings, inipath, G_KEY_FILE_NONE, &gerror);
+			ini_loaded = g_key_file_load_from_file(asm_ini, inipath, G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 
@@ -90,22 +92,22 @@ int read_settings(void)
 			// Then try the per-user ASM settings file
 			if (home) {
 				snprintf(inipath, PATH_MAX - 1, "%s/etc/asm.ini", home);
-				ini_loaded = g_key_file_load_from_file(settings, inipath, G_KEY_FILE_NONE, &gerror);
+				ini_loaded = g_key_file_load_from_file(asm_ini, inipath, G_KEY_FILE_NONE, &gerror);
 				if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 				if (ini_loaded) { break; }
 
 				snprintf(inipath, PATH_MAX - 1, "%s/etc/ASM.ini", home);
-				ini_loaded = g_key_file_load_from_file(settings, inipath, G_KEY_FILE_NONE, &gerror);
+				ini_loaded = g_key_file_load_from_file(asm_ini, inipath, G_KEY_FILE_NONE, &gerror);
 				if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 				if (ini_loaded) { break; }
 
 				snprintf(inipath, PATH_MAX - 1, "%s/.asm.ini", home);
-				ini_loaded = g_key_file_load_from_file(settings, inipath, G_KEY_FILE_NONE, &gerror);
+				ini_loaded = g_key_file_load_from_file(asm_ini, inipath, G_KEY_FILE_NONE, &gerror);
 				if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 				if (ini_loaded) { break; }
 
 				snprintf(inipath, PATH_MAX - 1, "%s/.ASM.ini", home);
-				ini_loaded = g_key_file_load_from_file(settings, inipath, G_KEY_FILE_NONE, &gerror);
+				ini_loaded = g_key_file_load_from_file(asm_ini, inipath, G_KEY_FILE_NONE, &gerror);
 				if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 				if (ini_loaded) { break; }
 			}
@@ -113,22 +115,22 @@ int read_settings(void)
 
 			// Last resort - perhaps there is a system-wide settings file?
 			snprintf(inipath, PATH_MAX - 1, "/etc/asm.ini");
-			ini_loaded = g_key_file_load_from_file(settings, "/etc/asm.ini", G_KEY_FILE_NONE, &gerror);
+			ini_loaded = g_key_file_load_from_file(asm_ini, "/etc/asm.ini", G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 
 			snprintf(inipath, PATH_MAX - 1, "/etc/ASM.ini");
-			ini_loaded = g_key_file_load_from_file(settings, "/etc/ASM.ini", G_KEY_FILE_NONE, &gerror);
+			ini_loaded = g_key_file_load_from_file(asm_ini, "/etc/ASM.ini", G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 
 			snprintf(inipath, PATH_MAX - 1, "/usr/local/etc/asm.ini");
-			ini_loaded = g_key_file_load_from_file(settings, "/usr/local/etc/asm.ini", G_KEY_FILE_NONE, &gerror);
+			ini_loaded = g_key_file_load_from_file(asm_ini, "/usr/local/etc/asm.ini", G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 
 			snprintf(inipath, PATH_MAX - 1, "/usr/local/etc/ASM.ini");
-			ini_loaded = g_key_file_load_from_file(settings, "/usr/local/etc/ASM.ini", G_KEY_FILE_NONE, &gerror);
+			ini_loaded = g_key_file_load_from_file(asm_ini, "/usr/local/etc/ASM.ini", G_KEY_FILE_NONE, &gerror);
 			if (gerror != NULL) { g_error_free(gerror); gerror = NULL; }
 			if (ini_loaded) { break; }
 		} while (0);
@@ -140,75 +142,100 @@ int read_settings(void)
 
 			asmlog_info("Reading settings from %s", inipath);
 
-			value = g_key_file_get_string(settings, "ASM", "enableAPImonitoring", NULL);
+			value = g_key_file_get_string(asm_ini, "ASM", "enableAPImonitoring", NULL);
 			if (value != NULL)
 			{
 				if (isdigit(*value))
 				{
 					ival = atoi(value);
-					if (errno == 0 && ival >= 0 && ival < 3) { enableAPImonitoring = ival; }
+					if (errno == 0 && ival >= 0 && ival < 3) {
+						settings.enableAPImonitoring = ival;
+					}
 				}
 				free(value);
 			}
 
-			value = g_key_file_get_string(settings, "ASM", "enableProfilePrefixSlotSelection", NULL);
+			value = g_key_file_get_string(asm_ini, "ASM", "enableProfilePrefixSlotSelection", NULL);
 			if (value != NULL)
 			{
 				if (isdigit(*value))
 				{
 					ival = atoi(value);
-					if (errno == 0 && ival >= 0 && ival < 2) { enableProfilePrefixSlotSelection = ival; }
+					if (errno == 0 && ival >= 0 && ival < 2) {
+						settings.enableProfilePrefixSlotSelection = ival;
+					}
 				}
 				free(value);
 			}
 
-			value = g_key_file_get_string(settings, "ASM", "objectcountinterval0", NULL);
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountinterval0", NULL);
 			if (value != NULL)
 			{
 				if (isdigit(*value))
 				{
 					ival = atoi(value);
-					if (errno == 0 && ival >= 0) { strncpy(OCI0, value, SMALSTRINGSIZE); OCI0[SMALSTRINGSIZE - 1] = '\0'; }
+					if (errno == 0 && ival >= 0) {
+						strncpy(settings.OCI0, value, sizeof(settings.OCI0));
+						settings.OCI0[sizeof(settings.OCI0) - 1] = '\0';
+					}
 				}
 				free(value);
 			}
 
-			value = g_key_file_get_string(settings, "ASM", "objectcountinterval1", NULL);
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountinterval1", NULL);
 			if (value != NULL)
 			{
 				if (isdigit(*value))
 				{
 					ival = atoi(value);
-					if (errno == 0 && ival >= 0) { strncpy(OCI1, value, SMALSTRINGSIZE); OCI1[SMALSTRINGSIZE - 1] = '\0';}
+					if (errno == 0 && ival >= 0) {
+						strncpy(settings.OCI1, value, sizeof(settings.OCI1));
+						settings.OCI1[sizeof(settings.OCI1) - 1] = '\0';
+					}
 				}
 				free(value);
 			}
 
-			value = g_key_file_get_string(settings, "ASM", "objectcountinterval2", NULL);
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountinterval2", NULL);
 			if (value != NULL)
 			{
 				if (isdigit(*value))
 				{
 					ival = atoi(value);
-					if (errno == 0 && ival >= 0) { strncpy(OCI2, value, SMALSTRINGSIZE); OCI2[SMALSTRINGSIZE - 1] = '\0'; }
+					if (errno == 0 && ival >= 0) {
+						strncpy(settings.OCI2, value, sizeof(settings.OCI2));
+						settings.OCI2[sizeof(settings.OCI2) - 1] = '\0';
+					}
 				}
 				free(value);
 			}
 
-			value = g_key_file_get_string(settings, "ASM", "objectcountcommand0", NULL);
-			if (value != NULL) { strncpy(OCC0, value, SMALSTRINGSIZE); OCC0[SMALSTRINGSIZE - 1] = '\0'; free(value); }
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand0", NULL);
+			if (value != NULL) {
+				strncpy(settings.OCC0, value, sizeof(settings.OCC0));
+				settings.OCC0[sizeof(settings.OCC0) - 1] = '\0';
+				free(value);
+			}
 
-			value = g_key_file_get_string(settings, "ASM", "objectcountcommand1", NULL);
-			if (value != NULL) { strncpy(OCC1, value, SMALSTRINGSIZE); OCC1[SMALSTRINGSIZE - 1] = '\0'; free(value); }
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand1", NULL);
+			if (value != NULL) {
+				strncpy(settings.OCC1, value, sizeof(settings.OCC1));
+				settings.OCC1[sizeof(settings.OCC1) - 1] = '\0';
+				free(value);
+			}
 
-			value = g_key_file_get_string(settings, "ASM", "objectcountcommand2", NULL);
-			if (value != NULL) { strncpy(OCC2, value, SMALSTRINGSIZE); OCC2[SMALSTRINGSIZE - 1] = '\0'; free(value); }
+			value = g_key_file_get_string(asm_ini, "ASM", "objectcountcommand2", NULL);
+			if (value != NULL) {
+				strncpy(settings.OCC2, value, sizeof(settings.OCC2));
+				settings.OCC2[sizeof(settings.OCC2) - 1] = '\0';
+				free(value);
+			}
 		}
 		else
 		{
 			asmlog_warning("No ASM.ini file could be loaded - using default values.");
 		}
-		g_key_file_free(settings);
+		g_key_file_free(asm_ini);
 	}
 
 	return status;

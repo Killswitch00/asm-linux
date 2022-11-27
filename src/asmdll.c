@@ -286,7 +286,7 @@ void RVExtension(char *output, int outputSize, const char *function)
 
 		case '9': // init
 			if (ArmaServerInfo == NULL) {
-				if (enableProfilePrefixSlotSelection > 0 && isdigit(function[2])) {
+				if (settings.enableProfilePrefixSlotSelection > 0 && isdigit(function[2])) {
 					asmlog_debug("selecting slot based on profileName...");
 					// Select the instance based on the leading digit in the server's profile name
 					errno = 0;
@@ -310,7 +310,9 @@ void RVExtension(char *output, int outputSize, const char *function)
 					memset(ArmaServerInfo->PROFILE, 0, sizeof(ArmaServerInfo->PROFILE));
 					strncpy(ArmaServerInfo->PROFILE, &function[2], sizeof(ArmaServerInfo->PROFILE));
 					ArmaServerInfo->PROFILE[sizeof(ArmaServerInfo->PROFILE) - 1] = '\0';
-					snprintf(output, outputSize, "_ASM_OPT=[%s,%s,%s,\"%s\",\"%s\",\"%s\"];", OCI0, OCI1, OCI2, OCC0, OCC1, OCC2);
+					snprintf(output, outputSize, "_ASM_OPT=[%s,%s,%s,\"%s\",\"%s\",\"%s\"];",
+							settings.OCI0, settings.OCI1, settings.OCI2,
+							settings.OCC0, settings.OCC1, settings.OCC2);
 				} else {
 					ArmaServerInfo = NULL;
 					asmlog_error("init failed - no available slots.");
