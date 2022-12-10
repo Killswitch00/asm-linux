@@ -198,6 +198,12 @@ int main(int argc, char** argv)
 		log_prefix = strdup(LOG_PREFIX_DEFAULT);
 	}
 
+	if (systemd) {
+		asmlog_systemd();
+	} else {
+		asmlog_console();
+	}
+
 	if (client) {
 		if (*host == '\0') {
 			snprintf(host, sizeof(host), "%s", "localhost");
@@ -222,21 +228,16 @@ int main(int argc, char** argv)
 	sigaction(SIGTERM, &sa, NULL);
 
 	if (server) {
-		if (systemd) {
-			asmlog_systemd();
-		} else {
-			asmlog_console();
-		}
 		// Work as a service
 		status = asmserver();
 	} else {
-		asmlog_console();
-
 		// Client: connect to server and receive stats
 		status = asmclient(instance_set);
 	}
 
 cleanup:
+	asmlog_close();
+
 	free(log_prefix);
 	free(prog_name);
 

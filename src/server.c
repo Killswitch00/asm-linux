@@ -342,6 +342,7 @@ int asmserver()
 			fd_set fds;
 
 			close(server); // child doesn't need the server socket
+			server = -1;
 
 			FD_ZERO(&fds);
 			FD_SET(client, &fds);
@@ -380,22 +381,18 @@ int asmserver()
 
 			close(client);
 			asmlog_info("Client %d disconnected", connected_clients);
-			asmlog_close();
-			_exit(0);
 		} else {
 			/* PARENT */
 			close(client);  // parent doesn't need the client socket
 		}
 	}
 
-	asmlog_info("Server exiting");
-
 	if (server > -1) {
 		close(server);
+		asmlog_info("Server exiting");
 	}
 
 	close_shmem();
-	asmlog_close();
 
 	return EXIT_SUCCESS;
 }
